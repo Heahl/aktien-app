@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+    <link rel="stylesheet" href="./stylesheets/style.css">
+    <script src="./javascripts/auth.js"></script>
+    <title>Stockmarket Login</title>
+</head>
+<body>
+<div class="login-container">
+    <h2>Login</h2>
+    <form id="login-form">
+        <div id="username-container">
+            <label for="username">Benutzername:</label>
+            <input type="text" name="username" placeholder="Benutzernamen eingeben..." id="username" required>
+        </div>
+        <div id="password-container">
+            <label for="password">Passwort:</label>
+            <input type="password" name="password" placeholder="Passwort eingeben..." id="password" required>
+        </div>
+        <button type="submit">Anmelden</button>
+    </form>
+    <div id="login-error"></div>
+</div>
+</body>
+</html>
