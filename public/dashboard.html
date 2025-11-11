@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <!-- bei jeder neuen Datei ohne defer direkt nach charset einfügen! -->
-    <script src="javascripts/auth-check.js"></script>
+    <script src="javascripts/auth/auth-check.js"></script>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
     <link rel="stylesheet" href="./stylesheets/style.css">
     <!-- hier die anderen Skripts hin -->
-    <script src="javascripts/deauth.js" defer></script>
-    <script src="javascripts/fetchData.js" defer></script>
+    <script src="javascripts/auth/deauth.js" defer></script>
+    <script src="javascripts/api/api-client.js" defer></script>
+    <script src="javascripts/ui/ui-updater.js" defer></script>
+    <!-- alle scripts vor diesem einbinden -->
     <script src="javascripts/dashboard.js" defer></script>
     <title>Dashboard</title>
 </head>
@@ -18,11 +20,48 @@
         <button>Nachrichten</button>
     </div>
     <div class="profile-container">
-        <p id="account-balance"></p>
+        <p><span id="account-balance"></span> €</p>
         <p id="username"></p>
-        <button id="logout-button"></button>
+        <button id="logout-button">Logout</button>
     </div>
 </nav>
-<h1>Dashboard</h1>
+<main>
+    <!-- Aktienkurse -->
+    <section id="stock-container">
+<h1 id="asset-name"></h1>
+        <p>Preis: <span id="price"></span></p>
+        <p>Verfügbar: <span id="numberAvailable"></span></p>
+   <section class="depot">
+       <select name="stockSelector" id="stockSelector">
+           <option value="default">-</option>
+       </select>
+   </section>
+    </section>
+    <!-- Portfolio des Spielers -->
+    <section id="portfolio">
+
+    </section>
+    <!-- Übersichtliche Liste aller Aktienkurse -->
+    s
+    <section id="stocks-container">
+        <template id="stocks-template">
+            <div class="stocks-info">
+                <span class="stocks-name"></span>
+                <span class="stocks-price"></span>
+                <span class="stocks-available"></span>
+            </div>
+        </template>
+    </section>
+    <!-- Rangliste aller Spieler -->
+    <section id="ranking-list-container">
+        <template id="ranking-item-template">
+            <div class="ranking-item">
+                <span class="rank-column"></span>
+                <span class="player-column"></span>
+                <span class="value-column"></span>
+            </div>
+        </template>
+    </section>
+</main>
 </body>
 </html>

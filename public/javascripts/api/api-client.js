@@ -8,6 +8,135 @@
  * @returns {Promise<Object|null>} Depot-Daten oder null bei Fehler
  */
 async function getAccount(){
+    const isLocalhost = location.hostname==='localhost'|| location.hostname==='127.0.0.1';
+    if(isLocalhost){
+        console.warn('lokale Testumgebung');
+        return {
+            "positions": [
+                {
+                    "stock": {
+                        "name": "adidas",
+                        "price": 1,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Allianz",
+                        "price": 326.42,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "BASF",
+                        "price": 74.21,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Bayer",
+                        "price": 5.64,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Beiersdorf",
+                        "price": 127.19,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "BMW",
+                        "price": 1,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Continental",
+                        "price": 1,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Covestro",
+                        "price": 1,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Daimler",
+                        "price": 230.81,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Delivery Hero",
+                        "price": 37.1,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Deutsche Bank",
+                        "price": 1,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Deutsche Börse",
+                        "price": 13.08,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Deutsche Post",
+                        "price": 1,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Deutsche Telekom",
+                        "price": 19.14,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                },
+                {
+                    "stock": {
+                        "name": "Deutsche Wohnen",
+                        "price": 1,
+                        "numberAvailable": 100000
+                    },
+                    "number": 0
+                }
+            ],
+            "value": 0
+        };
+    }
         try {
             const response = await fetch('api/account');
             switch (response.status){
@@ -100,6 +229,87 @@ async function getNews(lastTime){
  * @returns {Promise<any|null>} Liste von Aktien | null bei Fehler
  */
 async function getStocks(){
+    const isLocalhost = location.hostname==='localhost'|| location.hostname==='127.0.0.1';
+    if(isLocalhost){
+        console.warn('lokale Testumgebung');
+        return [
+            {
+                "name": "adidas",
+                "price": 1,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Allianz",
+                "price": 1,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "BASF",
+                "price": 46.94,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Bayer",
+                "price": 25.99,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Beiersdorf",
+                "price": 1,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "BMW",
+                "price": 10.79,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Continental",
+                "price": 1,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Covestro",
+                "price": 1,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Daimler",
+                "price": 251.34,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Delivery Hero",
+                "price": 1.95,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Deutsche Bank",
+                "price": 1,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Deutsche Börse",
+                "price": 64.35,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Deutsche Post",
+                "price": 44.12,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Deutsche Telekom",
+                "price": 1,
+                "numberAvailable": 100000
+            },
+            {
+                "name": "Deutsche Wohnen",
+                "price": 409.05,
+                "numberAvailable": 100000
+            }
+        ];
+    }
     try{
         const response = await fetch('api/stocks');
         switch (response.status){
@@ -121,9 +331,18 @@ async function getStocks(){
 /**
  * Holt den Namen und die balance des authentifizierten Nutzers
  *
- * @returns {Promise<any|null>} Objekt name,balance | null bei Fehler
+ * @returns {Promise<any|null>} Objekt name, balance | null bei Fehler
  */
 async function getUser(){
+    // FÜR TESTEN
+    const isLocalhost = location.hostname ==='localhost'|| location.hostname==='127.0.0.1';
+    if(isLocalhost){
+        console.warn('lokale Testumgebung');
+        return {
+            "name": "lempel",
+            "balance": 10000
+        };
+    }
     try{
         const response = await fetch('api/user');
         switch (response.status){
@@ -148,6 +367,28 @@ async function getUser(){
  * @returns {Promise<any|null>} Objekt {name,balance} | null bei Fehler
  */
 async function getEverybody(){
+    const isLocalhost = location.hostname==='localhost'|| location.hostname==='127.0.0.1';
+    if(isLocalhost) {
+        console.warn('lokale Testumgebung');
+        return [
+            {
+                "name": "max",
+                "sum": 10000
+            },
+            {
+                "name": "moritz",
+                "sum": 10000
+            },
+            {
+                "name": "lempel",
+                "sum": 10000
+            },
+            {
+                "name": "bolte",
+                "sum": 10000
+            }
+        ];
+    }
     try{
         const response = await fetch('api/user/everybody');
         switch (response.status){
