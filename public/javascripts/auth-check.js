@@ -9,7 +9,7 @@ function authCheck(){
         return false;
     }
 
-    // dekodieren (atob) -> gültigkeit prüfen
+    // dekodieren (ascii to binary) -> gültigkeit prüfen
     try {
         const payload = JSON.parse(atob(token));
         if(payload.exp && payload.exp < Date.now()){
