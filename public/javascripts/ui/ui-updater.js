@@ -292,6 +292,32 @@ function populateAssetSelector(stocks) {
     });
 }
 
+// Funktion: Fülle die Empfänger-Select-Box mit allen Nutzern
+async function populateRecipientSelector() {
+    const select = document.getElementById('recipient-selector');
+    if (!select) return;
+
+    // Leere Select
+    while (select.firstChild) {
+        select.removeChild(select.firstChild);
+    }
+
+    try {
+        // Hole alle Nutzer
+        const users = await getEverybody();
+
+        // Für jeden Nutzer: Option hinzufügen
+        users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.name;
+            option.textContent = user.name;
+            select.appendChild(option);
+        });
+    } catch (e) {
+        console.error('Fehler beim Laden der Nutzer:', e.message);
+    }
+}
+
 window.displayUser = displayUser;
 window.displayRanking = displayRanking;
 window.displayStocks = displayStocks;
@@ -299,3 +325,4 @@ window.stockSelector = stockSelector;
 window.displayMessages = displayMessages;
 window.displayNews = displayNews;
 window.populateAssetSelector = populateAssetSelector;
+window.populateRecipientSelector = populateRecipientSelector;

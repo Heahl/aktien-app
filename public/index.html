@@ -1,15 +1,139 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Stock Market</title>
+    <!-- bei jeder neuen Datei ohne defer direkt nach charset einfügen!
+    <script src="javascripts/auth/auth-check.js"></script> -->
+    <meta content="width=device-width, height=device-height, initial-scale=1" name="viewport">
+    <link href="./stylesheets/style.css" rel="stylesheet">
+    <!-- chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+    <!-- hier die anderen Skripts hin -->
+    <!-- <script src="javascripts/auth/deauth.js" defer></script> -->
+    <script src="javascripts/api/api-client.js" defer></script>
+    <script src="javascripts/ui/ui-updater.js" defer></script>
+    <!-- alle scripts vor diesem einbinden -->
+    <script src="javascripts/dashboard.js" defer></script>
+    <title>Dashboard</title>
 </head>
 <body>
-<h1>Stock Market</h1>
-<p>Eine extrem simple Börsensimulation</p>
-<p><a href="/api-docs">API Docs</a> </p>
-<p>Zur Nutzung im Fach Web Engineering 1</p>
-<p>Prof. Dr. Gero Wedemann, Hochschule Stralsund, 2025</p>
-<a href="dashboard.html">dashboard</a>
+<nav>
+    <div class="navigation-container">
+        <!-- <button>Nachrichten</button> -->
+    </div>
+    <div class="profile-container">
+        <span id="account-balance"></span>
+        <p id="username"></p>
+        <!-- <button id="logout-button">Logout</button> -->
+    </div>
+</nav>
+<main>
+    <!-- Aktienkurse -->
+    <section id="stock-container">
+        <h1 id="asset-name"></h1>
+        <span id="price"></span>
+        <span id="numberAvailable"></span>
+        <section class="depot">
+            <div class="stock-chart-container">
+                <canvas class="stock-chart" height="100" width="200"></canvas>
+            </div>
+        </section>
+    </section>
+    <!-- Kaufen/Verkaufen -->
+    <section id="depot">
+        <div id="trading-container">
+            <h2>Handeln</h2>
+            <div class="trading-tabs">
+                <button id="buy-tab" class="trade-tab active">Kaufen</button>
+                <button id="sell-tab" class="trade-tab">Verkaufen</button>
+            </div>
+        </div>
+        <div class="trading-field">
+            <label for="amount">Anzahl</label>
+            <input type="number" id="amount" placeholder="0" step="1" min="1">
+            <span>Aktien</span>
+        </div>
+        <div class="quick-select">
+            <button class="quick-select-btn" data-amount="1">1</button>
+            <button class="quick-select-btn" data-amount="5">5</button>
+            <button class="quick-select-btn" data-amount="10">10</button>
+            <button class="quick-select-btn" data-amount="50">50</button>
+        </div>
+        <div class="trading-field">
+            <label for="asset-selector">Aktie:</label>
+            <select name="asset-selector" id="asset-selector"></select>
+        </div>
+        <button id="review-order" class="review-button">Bestellung prüfen</button>
+    </section>
+    <!-- Portfolio des Spielers -->
+    <section id="portfolio-container">
+        <template id="portfolio-template">
+            <div class="portfolio-item">
+                <span class="portfolio-name"></span>
+                <span class="portfolio-value"></span>
+            </div>
+        </template>
+    </section>
+    <!-- Übersichtliche Liste aller Aktienkurse -->
+    <section id="stocks-container">
+        <template id="stocks-template">
+            <div class="stocks-info">
+                <span class="stocks-name"></span>
+                <span class="stocks-price"></span>
+                <span class="stocks-available"></span>
+            </div>
+        </template>
+    </section>
+    <!-- Rangliste aller Spieler -->
+    <section id="ranking-list-container">
+        <div id="test"></div>
+        <template id="ranking-item-template">
+            <div id="test1"></div>
+            <span class="rank-column"></span>
+            <span class="player-column"></span>
+            <span class="value-column"></span>
+        </template>
+    </section>
+    <!-- News -->
+    <section id="news-container">
+        <div class="news-controls">
+            <button id="newsLastHour">Letzte Stunde</button>
+            <button id="newsLastDay">Letzter Tag</button>
+            <button id="newsLastTwenty">Alle News</button>
+        </div>
+        <template id="news-template">
+            <div class="news-item">
+                <span class="news-time"></span>
+                <span class="news-text"></span>
+            </div>
+        </template>
+    </section>
+    <!-- Nachrichten -->
+    <section id="message-container">
+        <template id="message-template">
+            <div class="message-item">
+                <span class="message-sender"></span>
+                <span class="message-recipient"></span>
+                <span class="message-text"></span>
+                <span class="message-date"></span>
+            </div>
+        </template>
+    </section>
+    <!-- Nachrichten senden -->
+    <section id="message-sender">
+        <h2>Nachricht senden</h2>
+        <div class="message-field">
+            <label for="recipient-selector">Empfänger:</label>
+            <select name="recipient-selector" id="recipient-selector" multiple>
+            </select>
+            <small>Halte STRG gedrückt, um mehrere auszuwählen</small>
+        </div>
+        <div class="message-field">
+            <label for="message-text">Nachricht:</label>
+            <textarea id="message-text" placeholder="Nachricht eingeben..."></textarea>
+        </div>
+        <button id="send-message" class="send-button">Nachricht senden</button>
+    </section>
+</main>
 </body>
 </html>

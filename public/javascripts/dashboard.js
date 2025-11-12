@@ -11,6 +11,7 @@ async function init() {
     const sellTab = document.getElementById('sell-tab');
     const quickSelectBtns = document.querySelectorAll('.quick-select-btn');
     const reviewOrderBtn = document.getElementById('review-order');
+    const sendBtn = document.getElementById('send-message');
 
     const userData = await getUser();
     displayUser(userData);
@@ -110,6 +111,43 @@ async function init() {
     displayMessages(messages);
 
     await renderCharts();
+
+    await populateRecipientSelector();
+
+    sendBtn.addEventListener('click', async () => {
+        // Hole Empfänger
+        const selectedOptions = Array.from(
+            document.getElementById('recipient-selector').selectedOptions
+        );
+        const recipients = selectedOptions.map(option => option.value);
+
+        const message = document.getElementById('message-text').value.trim();
+
+        if (recipients.length === 0) {
+            alert('Bitte wählen Sie mindestens einen Empfänger aus.');
+            return;
+        }
+
+        if (message.length === 0) {
+            alert('Bitte geben Sie eine Nachricht ein.');
+
+        }
+        // Sende an alle ausgewählten Empfänger
+        const results = await sendMessagesToMultiple(recipients, message);
+
+        // zeige Ergebnis
+        const successful = results.filter(r => r.result !== null).length;
+        alert(`Nachricht an ${successful} von ${recipients.length} Empfängern gesendet.`);
+
+        // Zurücksetzen
+        document.getElementById('message-text').value = '';
+        selectedOptions.forEach(option => option.selected = false);
+
+        // nachrichten aktualisieren
+        const messages = await getMessages();
+        displayMessages(messages);
+    });
+
 
     // intervals
     setInterval(renderCharts, 5000);
@@ -237,4 +275,18 @@ async function renderCharts() {
             }
         }
     });
+}
+
+async function sendMessagesToMultiple(recipients, message) {
+    console.log('Sende nachricht an mehrere Empfänger: ', recipients);
+
+    const results = [];
+
+    for (const recipient of recipients) {
+        console.log("Sende Nachricht an: ", recipient);
+        const result = await postMessages(recipient, message);
+        results.push({recipient, result});
+        console.log("Ergebnis für", recipient, ':', result);
+    }
+    return results;
 }
