@@ -5,22 +5,25 @@
  *
  * @param userData :Object von getUser() übergebene Nutzerdaten
  */
-function displayUser(userData){
+function displayUser(userData) {
     // dom elemente holen
     const username = document.getElementById('username');
     const accountBalance = document.getElementById('account-balance');
 
     // checks
-    if(!username){
+    if (!username) {
         console.error("Element mit der id 'username' nicht gefunden.");
     }
-    if(!accountBalance){
+    if (!accountBalance) {
         console.error("Element mit der id 'account-balance' nicht gefunden.");
     }
 
     // username und account balance initial schreiben.
     username.textContent = userData.name;
-    accountBalance.textContent = userData.balance;
+    accountBalance.textContent = new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR'
+    }).format(userData.balance);
 }
 
 /**
@@ -28,64 +31,201 @@ function displayUser(userData){
  *
  * @param rankingData :Object mit Namen + summe von balance und depot value von allen Nutzern
  */
-function displayRanking(rankingData){
+function displayRanking(rankingData) {
     // dom elemente holen
     const container = document.getElementById('ranking-list-container');
 
     // checks
-    if(!container){
+    if (!container) {
         console.error("Element mit der id 'ranking-list-container' nicht gefunden");
     }
 
-    // container leeren
-    while (container.firstChild){
-        if(container.firstChild.id !== 'ranking-item-template'){
-        container.removeChild(container.firstChild);
-        }
+    const rankingTemplate = document.getElementById('ranking-item-template');
+    if (!rankingTemplate) {
+        console.error('Template mit id "ranking-item-template" nicht gefunden.');
+        console.log('Vorhandene Templates:', document.querySelectorAll('template'));
+        return;
     }
 
-    // von groß nach klein sortieren
-    rankingData.sort((a,b)=>b.sum-a.sum);
+    rankingData.forEach((entry, index) => {
+        const clone = document.importNode(rankingTemplate.content, true);
 
-    rankingData.forEach((entry,index)=>{
+        const rankEl = clone.querySelector('.rank-column');
+        const playerEl = clone.querySelector('.player-column');
+        const valueEl = clone.querySelector('.value-column');
+
+        if (rankEl) rankEl.textContent = index + 1;
+        if (playerEl) playerEl.textContent = entry.name;
+        if (valueEl) valueEl.textContent = new Intl.NumberFormat('de-DE', {
+            style: 'currency',
+            currency: 'EUR'
+        }).format(entry.sum);
+
+        container.appendChild(clone);
+    });
+}
+
+/**
+ * Zeigt eine Liste mit allen Aktien, deren Werten und Verfügbarkeit an.
+ *
+ * @param stocksData :Object von getStocks übergebene Daten
+ */
+function displayStocks(stocksData) {
+    const container = document.getElementById('stocks-container');
+    if (!container) {
+        console.error("Element mit der id 'stocks-container' nicht gefunden.");
+    }
+
+    const template = document.getElementById('stocks-template');
+    const children = Array.from(container.children);
+
+    children.forEach(child => {
+        if (child !== template) {
+            container.removeChild(child);
+        }
+    });
+
+    // template holen
+    if (!template) {
+        console.error("Template mit id 'stocks-template' nicht gefunden.");
+        return;
+    }
+
+    // Für jede Aktie: Template klonen und mit Daten füllen
+    stocksData.forEach(stock => {
+        const clone = document.importNode(template.content, true);
+
+        const nameEl = clone.querySelector('.stocks-name');
+        const priceEl = clone.querySelector('.stocks-price');
+        const availableEl = clone.querySelector('.stocks-available');
+
+        if (nameEl) nameEl.textContent = stock.name;
+        if (priceEl) priceEl.textContent = new Intl.NumberFormat('de-DE', {
+            style: 'currency',
+            currency: 'EUR'
+        }).format(stock.price);
+        if (availableEl) availableEl.textContent = `Verfügbar: ${stock.numberAvailable}`;
+
+        container.appendChild(clone);
+    });
+}
+
+/**
+ * Füllt das Selector Element zur Auswahl einzelner Aktien mit den Namen aller verfügbaren Unternehmen.
+ *
+ * @param stocks :Object von getStocks() übergebene Daten
+ */
+function stockSelector(stocks) {
+    const selectElement = document.getElementById('stockSelector');
+    if (!selectElement) {
+        console.error("Element mit der id 'stockSelector' wurde nicht gefunden.");
+    }
+
+    // feld leeren
+    while (selectElement.children.length > 0) {
+        selectElement.removeChild(selectElement.lastChild);
+    }
+
+    stocks.forEach(stock => {
+        const option = document.createElement('option');
+        option.value = stock.name;
+        option.textContent = stock.name;
+        selectElement.appendChild(option);
+    })
+}
+
+/**
+ * Zeigt alle Nachrichten mit Sender, Empfänger, Text und Datum an
+ *
+ * @param messagesData :[{}] von getMessages übergebene Daten
+ */
+function displayMessages(messagesData) {
+    const container = document.getElementById('message-container');
+    const template = document.getElementById('message-template');
+    const children = Array.from(container.children);
+    if (!container) {
+        console.error("Element mit der id 'message-container' nicht gefunden.");
+        return;
+    }
+    if (!template) {
+        console.error("Element mit der id 'message-template' nicht gefunden.");
+        return;
+    }
+    if (!children) {
+        console.error("Keine children in container gefunden");
+        return;
+    }
+    children.forEach(child => {
+        if (child !== template) {
+            container.removeChild(child);
+        }
+    });
+
+    function formatDate(isoString) {
+        const date = new Date(isoString);
+        return date.toLocaleTimeString('de-DE', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    }
+
+    messagesData.forEach(message => {
         const clone = template.content.cloneNode(true);
 
-        // elemente des templates greifen
-        const item = clone.querySelector('.ranking-item');
-        const rankCol = clone.querySelector('.rank-column');
-        const playerCol = clone.querySelector('.player-column');
-        const valueCol = clone.querySelector('.value-column');
+        const senderEl = clone.querySelector('.message-sender');
+        const recipientEl = clone.querySelector('.message-recipient');
+        const textEl = clone.querySelector('.message-text');
+        const dateEl = clone.querySelector('.message-date');
 
-        // füllen
-        rankCol.textContent = index +1;
-        playerCol.textContent = entry.name;
-        valueCol.textContent = entry.value;
+        if (senderEl) senderEl.textContent = message.sender;
+        if (recipientEl) recipientEl.textContent = message.recipient;
+        if (textEl) textEl.textContent = message.text;
+        if (dateEl) dateEl.textContent = formatDate(message.date);
 
-        // einfügen
         container.appendChild(clone);
     })
 }
 
-/* TODO: displayStocks fertig schreiben
-function displayStocks(stocksData){
-    const container = document.getElementById('stocks-container');
-    if(!container){
-        console.error("Element mit der Id 'stocks-container' wurde nicht gefunden.");
+function displayNews(news) {
+    // dom anfassen
+    const container = document.getElementById('news-container');
+    const template = document.getElementById('news-template');
+    const children = Array.from(container.children);
+    if (!container) {
+        console.error("Element mit der id 'news-container' nicht gefundent");
+        return;
     }
-
-    while (container.firstChild){
-        container.removeChild(container.firstChild);
+    if (!template) {
+        console.error("Element mit der id 'news-template' nicht gefunden");
+        return;
     }
-
-    const stocksTemplate = document.getElementById('stocks-template')
-    if(!stocksTemplate){
-        console.error("Element mit id 'stocks-template' nicht gefunden.");
+    if (!children) {
+        console.error("Children von Container nicht gefunden");
     }
+    // leeren
+    children.forEach(child => {
+        if (child !== template && child.classList.contains('news-item')) {
+            container.removeChild(child);
+        }
+    });
+    // einfügen
+    news.forEach(item => {
+        const clone = template.content.cloneNode(true);
+        const timeElement = clone.querySelector('.news-time');
+        const textElement = clone.querySelector('.news-text');
 
-    stocksData.forEach(stock=>{
+        if (timeElement) timeElement.textContent = item.time;
+        if (textElement) textElement.textContent = item.text;
+
+        container.appendChild(clone);
     })
 }
- */
 
 
-}
+window.displayUser = displayUser;
+window.displayRanking = displayRanking;
+window.displayStocks = displayStocks;
+window.stockSelector = stockSelector;
+window.displayMessages = displayMessages;
+window.displayNews = displayNews;
