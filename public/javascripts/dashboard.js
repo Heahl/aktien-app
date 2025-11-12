@@ -86,7 +86,7 @@ async function generateChartData() {
     const labels = window.stockHistory[firstStockName]?.map(item => {
         const date = new Date(item.timestamp);
         return date.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
-    });
+    }) || [];
 
     // Daten für jede Aktie aufbereiten
     const datasets = allStocks.map((stock, index) => {
@@ -102,7 +102,7 @@ async function generateChartData() {
             'rgb(83, 102, 255)'
         ];
         const color = colors[index % colors.length];
-        const data = window.stockHistory[stock.name]?.map(item => item.price);
+        const data = window.stockHistory[stock.name]?.map(item => item.price) || [];
 
         return {
             label: stock.name,
@@ -124,17 +124,22 @@ async function renderCharts() {
     const chartData = await generateChartData();
 
     const canvas = document.querySelector('.stock-chart');
+    if (!canvas) {
+        console.error('Canvas nicht gefunden');
+        return;
+    }
     const ctx = canvas.getContext('2d');
 
     // falls chart vorhanden => entfernen
-    while (window.currentChart) {
+    if (window.currentChart) {
         window.currentChart.destroy();
     }
 
     // neues chart erstellen
     window.currentChart = new Chart(ctx, {
         type: 'line',
-        chartData, options: {
+        chartData,
+        options: {
             responsive: true,
             plugins: {
                 title: {
