@@ -7,6 +7,9 @@ async function init(){
     const userData = await getUser();
    displayUser(userData);
 
+   //const rankingData = await getEverybody();
+   //displayRanking(rankingData);
+
 
 
 
