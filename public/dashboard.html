@@ -2,14 +2,14 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <!-- bei jeder neuen Datei ohne defer direkt nach charset einfügen! -->
-    <script src="javascripts/auth/auth-check.js"></script>
+    <!-- bei jeder neuen Datei ohne defer direkt nach charset einfügen!
+    <script src="javascripts/auth/auth-check.js"></script> -->
     <meta content="width=device-width, height=device-height, initial-scale=1" name="viewport">
     <link href="./stylesheets/style.css" rel="stylesheet">
     <!-- chart.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
     <!-- hier die anderen Skripts hin -->
-    <script src="javascripts/auth/deauth.js" defer></script>
+    <!-- <script src="javascripts/auth/deauth.js" defer></script> -->
     <script src="javascripts/api/api-client.js" defer></script>
     <script src="javascripts/ui/ui-updater.js" defer></script>
     <!-- alle scripts vor diesem einbinden -->
@@ -19,12 +19,12 @@
 <body>
 <nav>
     <div class="navigation-container">
-        <button>Nachrichten</button>
+        <!-- <button>Nachrichten</button> -->
     </div>
     <div class="profile-container">
         <span id="account-balance"></span>
         <p id="username"></p>
-        <button id="logout-button">Logout</button>
+        <!-- <button id="logout-button">Logout</button> -->
     </div>
 </nav>
 <main>
@@ -39,22 +39,41 @@
             </div>
         </section>
     </section>
-    <!-- Depot (einzelne Aktie) des Spielers -->
+    <!-- Kaufen/Verkaufen -->
     <section id="depot">
-        <template id="depot-template">
-            <div class="depo-item">
-                <span class="depot-name"></span>
-                <span class="depot-value"></span>
+        <div id="trading-container">
+            <h2>Handeln</h2>
+            <div class="trading-tabs">
+                <button id="buy-tab" class="trade-tab active">Kaufen</button>
+                <button id="sell-tab" class="trade-tab">Verkaufen</button>
+            </div>
+        </div>
+        <div class="trading-field">
+            <label for="amount">Anzahl</label>
+            <input type="number" id="amount" placeholder="0" step="1" min="1">
+            <span>Aktien</span>
+        </div>
+        <div class="quick-select">
+            <button class="quick-select-btn" data-amount="1">1</button>
+            <button class="quick-select-btn" data-amount="5">5</button>
+            <button class="quick-select-btn" data-amount="10">10</button>
+            <button class="quick-select-btn" data-amount="50">50</button>
+        </div>
+        <div class="trading-field">
+            <label for="asset-selector">Aktie:</label>
+            <select name="asset-selector" id="asset-selector"></select>
+        </div>
+        <button id="review-order" class="review-button">Bestellung prüfen</button>
+    </section>
+    <!-- Portfolio des Spielers -->
+    <section id="portfolio-container">
+        <template id="portfolio-template">
+            <div class="portfolio-item">
+                <span class="portfolio-name"></span>
+                <span class="portfolio-value"></span>
             </div>
         </template>
     </section>
-    <!-- Portfolio des Spielers -->
-    <template id="portfolio-template">
-        <div class="portfolio-item">
-            <span class="portfolio-name"></span>
-            <span class="portfolio-value"></span>
-        </div>
-    </template>
     <!-- Übersichtliche Liste aller Aktienkurse -->
     <section id="stocks-container">
         <template id="stocks-template">

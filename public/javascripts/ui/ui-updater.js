@@ -43,7 +43,7 @@ function displayRanking(rankingData) {
     const rankingTemplate = document.getElementById('ranking-item-template');
     if (!rankingTemplate) {
         console.error('Template mit id "ranking-item-template" nicht gefunden.');
-        console.log('Vorhandene Templates:', document.querySelectorAll('template'));
+        // console.log('Vorhandene Templates:', document.querySelectorAll('template'));
         return;
     }
 
@@ -111,7 +111,7 @@ function displayStocks(stocksData) {
 }
 
 /**
- * Füllt das Selector Element zur Auswahl einzelner Aktien mit den Namen aller verfügbaren Unternehmen.
+ * Füllt das Selector Element zur Auswahl einzelner Aktien mit den Namen aller Unternehmen im depot.
  *
  * @param stocks :Object von getStocks() übergebene Daten
  */
@@ -193,7 +193,7 @@ function displayNews(news) {
     const template = document.getElementById('news-template');
     const children = Array.from(container.children);
     if (!container) {
-        console.error("Element mit der id 'news-container' nicht gefundent");
+        console.error("Element mit der id 'news-container' nicht gefunden");
         return;
     }
     if (!template) {
@@ -222,6 +222,75 @@ function displayNews(news) {
     })
 }
 
+function displayDepot(accountData) {
+    const container = document.getElementById('portfolio-container');
+    const template = document.getElementById('portfolio-template');
+    const children = Array.from(container.children);
+
+    if (!container) {
+        console.error("Element mit der id 'portfolio-container' nicht gefunden");
+        return;
+    }
+    if (!template) {
+        console.error("Element mit der id 'portfolio-template' nicht gefunden");
+        return;
+    }
+
+    // leeren
+    children.forEach(child => {
+        if (child !== template) {
+            container.removeChild(child);
+        }
+    });
+
+    // console.log('accountData.positions:', accountData.positions);
+
+    // Alle Positionen im Depot schreiben
+    accountData.positions.forEach(position => {
+        // console.log('position:', position);
+
+        // Nur anzeigen, wenn Anzahl > 0
+        if (position.number > 0) {
+            const clone = template.content.cloneNode(true);
+
+            const nameElement = clone.querySelector('.portfolio-name');
+            const valueElement = clone.querySelector('.portfolio-value');
+
+            // console.log('nameElement:', nameElement);
+            // console.log('valueElement:', valueElement);
+
+            if (nameElement) nameElement.textContent = position.stock.name;
+            if (valueElement) valueElement.textContent = `Anzahl: ${position.number}`;
+
+            // console.log('nameElement.textContent:', nameElement?.textContent);
+            // console.log('valueElement.textContent:', valueElement?.textContent);
+
+            container.appendChild(clone);
+        }
+    });
+}
+
+function populateAssetSelector(stocks) {
+    const select = document.getElementById('asset-selector');
+    if (!select) {
+        console.error("Element mit der id 'asset-selector' nicht gefunden");
+    }
+
+    while (select.firstChild) {
+        select.removeChild(select.firstChild);
+    }
+    const defaultOption = document.createElement('option');
+    defaultOption.value = 'default';
+    defaultOption.textContent = "-"
+    select.appendChild(defaultOption);
+
+    stocks.forEach(stock => {
+        const option = document.createElement('option');
+        option.value = stock.name;
+        option.textContent = stock.name;
+        select.appendChild(option);
+    });
+}
 
 window.displayUser = displayUser;
 window.displayRanking = displayRanking;
@@ -229,3 +298,4 @@ window.displayStocks = displayStocks;
 window.stockSelector = stockSelector;
 window.displayMessages = displayMessages;
 window.displayNews = displayNews;
+window.populateAssetSelector = populateAssetSelector;

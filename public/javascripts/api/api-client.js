@@ -19,7 +19,7 @@ async function getAccount() {
                         "price": 1,
                         "numberAvailable": 100000
                     },
-                    "number": 0
+                    "number": 5
                 },
                 {
                     "stock": {
@@ -27,7 +27,7 @@ async function getAccount() {
                         "price": 326.42,
                         "numberAvailable": 100000
                     },
-                    "number": 0
+                    "number": 10
                 },
                 {
                     "stock": {
@@ -35,7 +35,7 @@ async function getAccount() {
                         "price": 74.21,
                         "numberAvailable": 100000
                     },
-                    "number": 0
+                    "number": 20
                 },
                 {
                     "stock": {
@@ -43,7 +43,7 @@ async function getAccount() {
                         "price": 5.64,
                         "numberAvailable": 100000
                     },
-                    "number": 0
+                    "number": 56
                 },
                 {
                     "stock": {
@@ -285,7 +285,7 @@ async function getNews(lastTime) {
         return simulatedNews;
     }
 
-    // In Produktion: echter API-Aufruf
+    // In prod
     try {
         let url = '/api/news';
         if (lastTime !== undefined) {
@@ -563,7 +563,7 @@ async function postPositions(stockName, number) {
  */
 async function postMessages(recipient, message) {
     // Typ prüfen
-    if (typeof recipient !== string || typeof message !== string) {
+    if (typeof recipient !== 'string' || typeof message !== 'string') {
         console.error('Ungültige Parameter: beide müssen string sein.');
         return null;
     }

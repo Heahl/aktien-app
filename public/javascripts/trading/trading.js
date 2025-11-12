@@ -1,2 +1,0 @@
-// hier kauf/verkauf logik
-
