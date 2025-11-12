@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <!-- bei jeder neuen Datei ohne defer direkt nach charset einfügen! -->
     <script src="javascripts/auth/auth-check.js"></script>
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
-    <link rel="stylesheet" href="./stylesheets/style.css">
+    <meta content="width=device-width, height=device-height, initial-scale=1" name="viewport">
+    <link href="./stylesheets/style.css" rel="stylesheet">
     <!-- hier die anderen Skripts hin -->
     <script src="javascripts/auth/deauth.js" defer></script>
     <script src="javascripts/api/api-client.js" defer></script>
@@ -20,7 +20,7 @@
         <button>Nachrichten</button>
     </div>
     <div class="profile-container">
-        <p><span id="account-balance"></span> €</p>
+        <span id="account-balance"></span>
         <p id="username"></p>
         <button id="logout-button">Logout</button>
     </div>
@@ -28,21 +28,35 @@
 <main>
     <!-- Aktienkurse -->
     <section id="stock-container">
-<h1 id="asset-name"></h1>
-        <p>Preis: <span id="price"></span></p>
-        <p>Verfügbar: <span id="numberAvailable"></span></p>
-   <section class="depot">
-       <select name="stockSelector" id="stockSelector">
-           <option value="default">-</option>
-       </select>
-   </section>
+        <h1 id="asset-name"></h1>
+        <span id="price"></span>
+        <span id="numberAvailable"></span>
+        <section class="depot">
+            <select id="stockSelector" name="stockSelector">
+
+            </select>
+            <div class="stock-chart-container">
+                <canvas class="stock-chart" height="100" width="200"></canvas>
+            </div>
+        </section>
+    </section>
+    <!-- Depot (einzelne Aktie) des Spielers -->
+    <section id="depot">
+        <template id="depot-template">
+            <div class="depo-item">
+                <span class="depot-name"></span>
+                <span class="depot-value"></span>
+            </div>
+        </template>
     </section>
     <!-- Portfolio des Spielers -->
-    <section id="portfolio">
-
-    </section>
+    <template id="portfolio-template">
+        <div class="portfolio-item">
+            <span class="portfolio-name"></span>
+            <span class="portfolio-value"></span>
+        </div>
+    </template>
     <!-- Übersichtliche Liste aller Aktienkurse -->
-    s
     <section id="stocks-container">
         <template id="stocks-template">
             <div class="stocks-info">
@@ -54,11 +68,36 @@
     </section>
     <!-- Rangliste aller Spieler -->
     <section id="ranking-list-container">
+        <div id="test"></div>
         <template id="ranking-item-template">
-            <div class="ranking-item">
-                <span class="rank-column"></span>
-                <span class="player-column"></span>
-                <span class="value-column"></span>
+            <div id="test1"></div>
+            <span class="rank-column"></span>
+            <span class="player-column"></span>
+            <span class="value-column"></span>
+        </template>
+    </section>
+    <!-- News -->
+    <section id="news-container">
+        <div class="news-controls">
+            <button id="newsLastHour">Letzte Stunde</button>
+            <button id="newsLastDay">Letzter Tag</button>
+            <button id="newsLastTwenty">Alle News</button>
+        </div>
+        <template id="news-template">
+            <div class="news-item">
+                <span class="news-time"></span>
+                <span class="news-text"></span>
+            </div>
+        </template>
+    </section>
+    <!-- Nachrichten -->
+    <section id="message-container">
+        <template id="message-template">
+            <div class="message-item">
+                <span class="message-sender"></span>
+                <span class="message-recipient"></span>
+                <span class="message-text"></span>
+                <span class="message-date"></span>
             </div>
         </template>
     </section>
