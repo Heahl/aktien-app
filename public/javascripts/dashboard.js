@@ -62,6 +62,7 @@ window.stockHistory = {};
 async function generateChartData() {
     // hole aktuelle kurse
     const allStocks = await getStocks();
+    console.log('allStocks:', allStocks);
     // Zeitstempel hinzufügen
     const now = Date.now();
 
@@ -83,11 +84,13 @@ async function generateChartData() {
 
     // Zeitstempel von der ersten Aktie nehmen
     const firstStockName = allStocks[0]?.name;
+    console.log('firstStockName:', firstStockName);
     const labels = window.stockHistory[firstStockName]?.map(item => {
         const date = new Date(item.timestamp);
         return date.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
     }) || [];
 
+    console.log('labels:', labels);
     // Daten für jede Aktie aufbereiten
     const datasets = allStocks.map((stock, index) => {
         // Farbe für die Linie festlegen
@@ -104,6 +107,8 @@ async function generateChartData() {
         const color = colors[index % colors.length];
         const data = window.stockHistory[stock.name]?.map(item => item.price) || [];
 
+        console.log('dataset data for', stock.name, ':', data);
+
         return {
             label: stock.name,
             data,
@@ -114,6 +119,7 @@ async function generateChartData() {
         };
     });
 
+    console.log('datasets:', datasets);
     return {
         labels: labels,
         datasets: datasets
@@ -138,7 +144,7 @@ async function renderCharts() {
     // neues chart erstellen
     window.currentChart = new Chart(ctx, {
         type: 'line',
-        chartData,
+        data: chartData,
         options: {
             responsive: true,
             plugins: {
