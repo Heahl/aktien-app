@@ -6,6 +6,8 @@
     <script src="javascripts/auth/auth-check.js"></script>
     <meta content="width=device-width, height=device-height, initial-scale=1" name="viewport">
     <link href="./stylesheets/style.css" rel="stylesheet">
+    <!-- chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
     <!-- hier die anderen Skripts hin -->
     <script src="javascripts/auth/deauth.js" defer></script>
     <script src="javascripts/api/api-client.js" defer></script>
@@ -32,9 +34,6 @@
         <span id="price"></span>
         <span id="numberAvailable"></span>
         <section class="depot">
-            <select id="stockSelector" name="stockSelector">
-
-            </select>
             <div class="stock-chart-container">
                 <canvas class="stock-chart" height="100" width="200"></canvas>
             </div>
