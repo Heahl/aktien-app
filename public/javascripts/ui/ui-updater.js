@@ -304,19 +304,61 @@ async function populateRecipientSelector() {
 
     try {
         // Hole alle Nutzer
-        const users = await getEverybody();
+        const result = await getEverybody();
 
-        // Für jeden Nutzer: Option hinzufügen
-        users.forEach(user => {
-            const option = document.createElement('option');
-            option.value = user.name;
-            option.textContent = user.name;
-            select.appendChild(option);
-        });
+        if (result.success) {
+            const users = result.data;
+            // Für jeden Nutzer: Option hinzufügen
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.name;
+                option.textContent = user.name;
+                select.appendChild(option);
+            });
+        } else {
+            showToast(result.error.message, result.error.status);
+        }
     } catch (e) {
         console.error('Fehler beim Laden der Nutzer:', e.message);
+        showToast(result.error.status, result.error.message);
     }
 }
+
+// Zeige toast (aufgerufen in api-client, wenn !response.ok)
+function showToast(message, status, type = "error") {
+    const container = document.getElementById('toast-container');
+    const template = document.getElementById('toast-template');
+    if (!container) {
+        console.error("Element mit der id 'toast-container' nicht gefunden");
+        return;
+    }
+    if (!template) {
+        console.error("Element mit der id 'toast-template' nicht gefunden");
+        return;
+    }
+
+    const clone = template.content.cloneNode(true);
+    const toast = clone.querySelector('.toast');
+    const statusElement = clone.querySelector('.toast-status');
+    const messageElement = clone.querySelector('.toast-message');
+    const closeBtn = clone.querySelector('.toast-close');
+
+    if (statusElement) statusElement.textContent = `Status: ${status}`;
+    if (messageElement) messageElement.textContent = message;
+    // falls wir später noch andere Typen implementieren wollen (zB. warning)
+    if (toast) toast.className = `toast toast-${type}`;
+    if (closeBtn) closeBtn.addEventListener('click', () => {
+        toast.remove();
+    });
+
+    // automatisch nach 6sec entfernen
+    setTimeout(() => {
+        toast.remove();
+    }, 6 * 1000);
+
+    document.getElementById('toast-container').appendChild(toast);
+}
+
 
 window.displayUser = displayUser;
 window.displayRanking = displayRanking;
@@ -326,3 +368,4 @@ window.displayMessages = displayMessages;
 window.displayNews = displayNews;
 window.populateAssetSelector = populateAssetSelector;
 window.populateRecipientSelector = populateRecipientSelector;
+window.showToast = showToast;

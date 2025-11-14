@@ -13,21 +13,36 @@ async function init() {
     const reviewOrderBtn = document.getElementById('review-order');
     const sendBtn = document.getElementById('send-message');
 
-    const userData = await getUser();
-    displayUser(userData);
-    //console.log('Templates NACH getUser():', document.querySelectorAll('template').length);
+    const userResult = await getUser();
+    if (userResult.success) {
+        displayUser(userResult.data);
+    } else {
+        showToast(userResult.error.message, userResult.error.status);
+    }
 
-    const rankingData = await getEverybody();
-    //console.log('Templates NACH getEverybody():', document.querySelectorAll('template').length);
-    //console.log('rankingData erhalten:', rankingData);
-    displayRanking(rankingData);
+    const rankingResult = await getEverybody();
+    if (rankingResult.success) {
+        displayRanking(rankingResult.data);
+    } else {
+        showToast(rankingResult.error.message, rankingResult.error.status);
+    }
 
-    const accountData = await getAccount();
-    displayDepot(accountData);
+    // getAccount
+    const accountResult = await getAccount();
+    if (accountResult.success) {
+        displayDepot(accountResult.data);
+    } else {
+        showToast(accountResult.error.message, accountResult.error.status);
+    }
 
-    const stocks = await getStocks();
-    displayStocks(stocks);
-    populateAssetSelector(stocks);
+    // getStocks
+    const stocksResult = await getStocks();
+    if (stocksResult.success) {
+        displayStocks(stocksResult.data);
+        populateAssetSelector(stocksResult.data);
+    } else {
+        showToast(stocksResult.error.message, stocksResult.error.status);
+    }
 
     buyTab.addEventListener('click', () => {
         document.getElementById('buy-tab').classList.add('active');
@@ -62,14 +77,21 @@ async function init() {
         }
 
         console.log('Sende Transaktion an Server...');
+        let result;
         if (isBuy) {
             console.log('Kaufe Aktien:', assetName, 'Anzahl:', amount);
-            const result = await postPositions(assetName, amount);
-            console.log('Kauf-Antwort:', result);
+            result = await postPositions(assetName, amount);
         } else {
             console.log('Verkaufe Aktien:', assetName, 'Anzahl:', amount);
-            const result = await postPositions(assetName, -amount);
-            console.log('Verkauf-Antwort:', result);
+            result = await postPositions(assetName, -amount);
+        }
+
+        if (result.success) {
+            console.log('Transaktion erfolgreich:', result.data);
+            showToast('Transaktion erfolgreich!', 201, 'success');
+        } else {
+            console.log('Transaktion fehlgeschlagen:', result.error);
+            showToast(result.error.message, result.error.status);
         }
 
         // Zurücksetzen
@@ -79,9 +101,14 @@ async function init() {
 
         // Optional: Depot aktualisieren
         console.log('Aktualisiere Depot...');
-        const accountData = await getAccount();
-        console.log('Neue Depot-Daten:', accountData);
-        displayDepot(accountData);
+        const accountResult = await getAccount();
+        if (accountResult.success) {
+            console.log('Neue Depot-Daten:', accountResult.data);
+            displayDepot(accountResult.data);
+        } else {
+            console.log('Fehler beim Aktualisieren des Depots:', accountResult.error);
+            showToast(accountResult.error.message, accountResult.error.status);
+        }
         console.log('Depot aktualisiert');
     });
 
@@ -93,8 +120,12 @@ async function init() {
         }
     }
 
-    const news = await getNews();
-    displayNews(news);
+    const newsResult = await getNews();
+    if (newsResult.success) {
+        displayNews(newsResult.data);
+    } else {
+        showToast(newsResult.error.message, newsResult.error.status);
+    }
 
     // event listener anhängen
     newsLastHourBtn.addEventListener('click', () =>
@@ -104,11 +135,21 @@ async function init() {
         loadNewsSince(60 * 60 * 24));
 
     newLastTwentyBtn.addEventListener('click', () =>
-        getNews(null).then(news => displayNews(news)));
+        getNews(null).then(result => {
+            if (result.success) {
+                displayNews(result.data);
+            } else {
+                showToast(result.error.message, result.error.status);
+            }
+        }));
 
 
-    const messages = await getMessages();
-    displayMessages(messages);
+    const messagesResult = await getMessages();
+    if (messagesResult.success) {
+        displayMessages(messagesResult.data);
+    } else {
+        showToast(messagesResult.error.message, messagesResult.error.status);
+    }
 
     await renderCharts();
 
@@ -130,13 +171,14 @@ async function init() {
 
         if (message.length === 0) {
             alert('Bitte geben Sie eine Nachricht ein.');
-
+            return;
         }
+
         // Sende an alle ausgewählten Empfänger
         const results = await sendMessagesToMultiple(recipients, message);
 
         // zeige Ergebnis
-        const successful = results.filter(r => r.result !== null).length;
+        const successful = results.filter(r => r.result.success).length;
         alert(`Nachricht an ${successful} von ${recipients.length} Empfängern gesendet.`);
 
         // Zurücksetzen
@@ -144,14 +186,21 @@ async function init() {
         selectedOptions.forEach(option => option.selected = false);
 
         // nachrichten aktualisieren
-        const messages = await getMessages();
-        displayMessages(messages);
+        const messagesResult = await getMessages();
+        if (messagesResult.success) {
+            displayMessages(messagesResult.data);
+        } else {
+            showToast(messagesResult.error.message, messagesResult.error.status);
+        }
     });
 
 
     // intervals
     setInterval(renderCharts, 5000);
 }
+
+// === ENDE init() ===
+
 
 function loadNewsSince(secondsAgo) {
     // aktueller unix timestamp
@@ -161,8 +210,17 @@ function loadNewsSince(secondsAgo) {
     // console.log('loadNewsSince aufgerufen mit lastTime:', lastTime);
 
     getNews(lastTime)
-        .then(news => displayNews(news))
-        .catch(error => console.error("Fehler beim Laden der news in loadNewsSince(): ", error));
+        .then(result => {
+            if (result.success) {
+                displayNews(result.data);
+            } else {
+                showToast(result.error.message, result.error.status);
+            }
+        })
+        .catch(error => {
+            console.error("Fehler beim Laden der news in loadNewsSince(): ", error);
+            showToast('Netzwerkfehler: ' + error.message, 0);
+        });
 }
 
 
@@ -171,7 +229,14 @@ window.stockHistory = {};
 
 async function generateChartData() {
     // hole aktuelle kurse
-    const allStocks = await getStocks();
+    const stocksResult = await getStocks();
+    if (!stocksResult.success) {
+        console.error('Fehler beim Laden der Aktien für Chart:', stocksResult.error);
+        showToast(stocksResult.error.message, stocksResult.error.status);
+        return {labels: [], datasets: []};
+    }
+    const allStocks = stocksResult.data;
+
     // console.log('allStocks:', allStocks);
     // Zeitstempel hinzufügen
     const now = Date.now();
@@ -254,7 +319,7 @@ async function renderCharts() {
     // neues chart erstellen
     window.currentChart = new Chart(ctx, {
         type: 'line',
-        data: chartData,
+        chartData,
         options: {
             responsive: true,
             animation: null,

@@ -1,4 +1,5 @@
 "use strict";
+// TODO: return null in switch cases müssen eigentlich json zurückgeben
 
 // === GET ===
 
@@ -141,17 +142,38 @@ async function getAccount() {
         const response = await fetch('api/account');
         switch (response.status) {
             case 200:
-                return await response.json();
+                return {
+                    success: true,
+                    data: await response.json()
+                }
             case 500:
-                console.error('Internal Server Error:', await response.json());
-                return null;
+                const error500 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: response.status,
+                        message: error500.message
+                    }
+                }
             default:
-                console.error('Fehler:', response.status);
-                return null;
+                console.error('Fehler bei getAccount: ', response.status);
+                return {
+                    success: false,
+                    error: {
+                        status: response.status,
+                        message: `HTTP ${response.status}`
+                    }
+                };
         }
     } catch (e) {
-        console.error("Netzwerkfehler: ", e.message);
-        return null;
+        console.error('Netzwerkfehler:', e.message);
+        return {
+            success: false,
+            error: {
+                status: 0,
+                message: "Netzwerkfehler: " + e.message
+            }
+        };
     }
 }
 
@@ -222,17 +244,47 @@ async function getMessages(lastTime) {
 
         switch (response.status) {
             case 200:
-                return await response.json();
+                return {
+                    success: true,
+                    data: await response.json()
+                };
             case 422:
-                console.error("lastTime ungültig:", await response.json());
-                return null;
+                const error422 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: 422,
+                        message: error422.message
+                    }
+                };
             case 500:
-                console.error("Internal Server Error:", await response.json());
-                return null;
+                const error500 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: 500,
+                        message: error500.message
+                    }
+                };
+            default:
+                console.error('Fehler:' + response.status);
+                return {
+                    success: false,
+                    error: {
+                        status: response.status,
+                        message: `HTTP ${response.status}`
+                    }
+                };
         }
     } catch (e) {
-        console.error("Netzwerkfehler: ", e.message);
-        return null;
+        console.error('Netzwerkfehler:', e.message);
+        return {
+            success: false,
+            error: {
+                status: 0,
+                message: "Netzwerkfehler: " + e.message
+            }
+        };
     }
 }
 
@@ -295,20 +347,47 @@ async function getNews(lastTime) {
 
         switch (response.status) {
             case 200:
-                return await response.json();
+                return {
+                    success: true,
+                    data: await response.json()
+                };
             case 422:
-                console.error('lastTime ungültig:', await response.json());
-                return null;
+                const error422 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: 422,
+                        message: error422.message
+                    }
+                };
             case 500:
-                console.error('Internal Server Error:', await response.json());
-                return null;
+                const error500 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: 500,
+                        message: error500.message
+                    }
+                };
             default:
-                console.error('Fehler:', response.status);
-                return null;
+                console.error('Fehler:' + response.status);
+                return {
+                    success: false,
+                    error: {
+                        status: response.status,
+                        message: `HTTP ${response.status}`
+                    }
+                };
         }
     } catch (e) {
         console.error('Netzwerkfehler:', e.message);
-        return null;
+        return {
+            success: false,
+            error: {
+                status: 0,
+                message: "Netzwerkfehler: " + e.message
+            }
+        };
     }
 }
 
@@ -403,24 +482,45 @@ async function getStocks() {
         const response = await fetch('api/stocks');
         switch (response.status) {
             case 200:
-                return await response.json();
+                return {
+                    success: true,
+                    data: await response.json()
+                };
             case 500:
-                console.error('Internal Server Error: ', await response.json());
-                return null;
+                const error500 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: 500,
+                        message: error500.message
+                    }
+                };
             default:
-                console.error('Fehler:', response.status);
-                return null;
+                console.error('Fehler: ', response.status);
+                return {
+                    success: false,
+                    error: {
+                        status: response.status,
+                        message: `HTTP ${response.status}`
+                    }
+                };
         }
     } catch (e) {
-        console.error('Netzwerkfehler: ', e.message);
-        return null;
+        console.error('Netzwerkfehler:', e.message);
+        return {
+            success: false,
+            error: {
+                status: 0,
+                message: "Netzwerkfehler: " + e.message
+            }
+        };
     }
 }
 
 /**
  * Holt den Namen und die balance des authentifizierten Nutzers
  *
- * @returns {Promise<any|null>} Objekt name, balance | null bei Fehler
+ * @returns {Promise<{success: boolean, data?: {name: string, balance: number}, error?: {status: number, message: string}}>} Ergebnis
  */
 async function getUser() {
     // FÜR TESTEN
@@ -433,20 +533,41 @@ async function getUser() {
         };
     }
     try {
-        const response = await fetch('api/user');
+        const response = await fetch('/api/user');
         switch (response.status) {
             case 200:
-                return await response.json();
+                return {
+                    success: true,
+                    data: await response.json()
+                };
             case 500:
-                console.error('Internal Server Error:', await response.json());
-                return null;
+                const error500 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: 500,
+                        message: error500.message
+                    }
+                };
             default:
-                console.error('Fehler:', response.status);
-                return null;
+                console.error('Fehler: ', response.status);
+                return {
+                    success: false,
+                    error: {
+                        status: response.status,
+                        message: `HTTP ${response.status}`
+                    }
+                };
         }
     } catch (e) {
         console.error('Netzwerkfehler:', e.message);
-        return null;
+        return {
+            success: false,
+            error: {
+                status: 0,
+                message: "Netzwerkfehler: " + e.message
+            }
+        };
     }
 }
 
@@ -479,20 +600,41 @@ async function getEverybody() {
         ];
     }
     try {
-        const response = await fetch('api/user/everybody');
+        const response = await fetch('/api/user/everybody');
         switch (response.status) {
             case 200:
-                return await response.json();
+                return {
+                    success: true,
+                    data: await response.json()
+                };
             case 500:
-                console.error('Internal Server Error:', await response.json());
-                return null;
+                const error500 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: 500,
+                        message: error500.message
+                    }
+                };
             default:
                 console.error('Fehler: ', response.status);
-                return null;
+                return {
+                    success: false,
+                    error: {
+                        status: response.status,
+                        message: `HTTP ${response.status}`
+                    }
+                };
         }
     } catch (e) {
         console.error('Netzwerkfehler:', e.message);
-        return null;
+        return {
+            success: false,
+            error: {
+                status: 0,
+                message: "Netzwerkfehler: " + e.message
+            }
+        };
     }
 }
 
@@ -537,20 +679,47 @@ async function postPositions(stockName, number) {
 
         switch (response.status) {
             case 201:
-                return await response.json();
+                return {
+                    success: true,
+                    data: await response.json()
+                };
             case 422:
-                console.error('Ungültige Eingabe/unzureichende Deckung:', await response.json());
-                return null;
+                const error422 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: 422,
+                        message: error422.message
+                    }
+                };
             case 500:
-                console.error('Internal Server Error:', await response.json());
-                return null;
+                const error500 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: 500,
+                        message: error500.message
+                    }
+                };
             default:
                 console.error('Fehler:' + response.status);
-                return null;
+                return {
+                    success: false,
+                    error: {
+                        status: response.status,
+                        message: `HTTP ${response.status}`
+                    }
+                };
         }
     } catch (e) {
         console.error('Netzwerkfehler:', e.message);
-        return null;
+        return {
+            success: false,
+            error: {
+                status: 0,
+                message: "Netzwerkfehler: " + e.message
+            }
+        };
     }
 }
 
@@ -590,17 +759,46 @@ async function postMessages(recipient, message) {
 
         switch (response.status) {
             case 200:
-                return await response.json();
+                return {
+                    success: true,
+                    data: await response.json()
+                };
             case 422:
-                console.error('Invalid input:', await response.json());
-                return null;
+                const error422 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: 422,
+                        message: error422.message
+                    }
+                };
             case 500:
-                console.error('Internal Server Error:', await response.json());
-                return null;
+                const error500 = await response.json();
+                return {
+                    success: false,
+                    error: {
+                        status: 500,
+                        message: error500.message
+                    }
+                };
             default:
-                console.error('Fehler:', response.status);
+                console.error('Fehler:' + response.status);
+                return {
+                    success: false,
+                    error: {
+                        status: response.status,
+                        message: `HTTP ${response.status}`
+                    }
+                };
         }
     } catch (e) {
-        console.error("Netzwerkfehler:", e.message);
+        console.error('Netzwerkfehler:', e.message);
+        return {
+            success: false,
+            error: {
+                status: 0,
+                message: "Netzwerkfehler: " + e.message
+            }
+        };
     }
 }

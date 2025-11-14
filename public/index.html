@@ -13,7 +13,7 @@
     <script src="javascripts/api/api-client.js" defer></script>
     <script src="javascripts/ui/ui-updater.js" defer></script>
     <!-- alle scripts vor diesem einbinden -->
-    <script src="javascripts/dashboard.js" defer></script>
+    <script src="javascripts/main.js" defer></script>
     <title>Dashboard</title>
 </head>
 <body>
@@ -134,6 +134,20 @@
         </div>
         <button id="send-message" class="send-button">Nachricht senden</button>
     </section>
+    <!-- Toast (wird bei Fehlermeldungen eingeblendet -->
+    <div id="toast-container">
+        <template id="toast-template">
+            <div class="toast toast-error">
+                <div class="toast-header">
+                    <span class="toast-status"></span>
+                    <button class="toast-close">x</button>
+                </div>
+                <div class="toast-body">
+                    <span class="toast-message"></span>
+                </div>
+            </div>
+        </template>
+    </div>
 </main>
 </body>
 </html>
