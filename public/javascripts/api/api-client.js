@@ -1,5 +1,4 @@
 "use strict";
-// TODO: return null in switch cases müssen eigentlich json zurückgeben
 
 // === GET ===
 
@@ -9,137 +8,8 @@
  * @returns {Promise<Object|null>} Depot-Daten oder null bei Fehler
  */
 async function getAccount() {
-    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-    if (isLocalhost) {
-        console.warn('lokale Testumgebung');
-        return {
-            "positions": [
-                {
-                    "stock": {
-                        "name": "adidas",
-                        "price": 1,
-                        "numberAvailable": 100000
-                    },
-                    "number": 5
-                },
-                {
-                    "stock": {
-                        "name": "Allianz",
-                        "price": 326.42,
-                        "numberAvailable": 100000
-                    },
-                    "number": 10
-                },
-                {
-                    "stock": {
-                        "name": "BASF",
-                        "price": 74.21,
-                        "numberAvailable": 100000
-                    },
-                    "number": 20
-                },
-                {
-                    "stock": {
-                        "name": "Bayer",
-                        "price": 5.64,
-                        "numberAvailable": 100000
-                    },
-                    "number": 56
-                },
-                {
-                    "stock": {
-                        "name": "Beiersdorf",
-                        "price": 127.19,
-                        "numberAvailable": 100000
-                    },
-                    "number": 0
-                },
-                {
-                    "stock": {
-                        "name": "BMW",
-                        "price": 1,
-                        "numberAvailable": 100000
-                    },
-                    "number": 0
-                },
-                {
-                    "stock": {
-                        "name": "Continental",
-                        "price": 1,
-                        "numberAvailable": 100000
-                    },
-                    "number": 0
-                },
-                {
-                    "stock": {
-                        "name": "Covestro",
-                        "price": 1,
-                        "numberAvailable": 100000
-                    },
-                    "number": 0
-                },
-                {
-                    "stock": {
-                        "name": "Daimler",
-                        "price": 230.81,
-                        "numberAvailable": 100000
-                    },
-                    "number": 0
-                },
-                {
-                    "stock": {
-                        "name": "Delivery Hero",
-                        "price": 37.1,
-                        "numberAvailable": 100000
-                    },
-                    "number": 0
-                },
-                {
-                    "stock": {
-                        "name": "Deutsche Bank",
-                        "price": 1,
-                        "numberAvailable": 100000
-                    },
-                    "number": 0
-                },
-                {
-                    "stock": {
-                        "name": "Deutsche Börse",
-                        "price": 13.08,
-                        "numberAvailable": 100000
-                    },
-                    "number": 0
-                },
-                {
-                    "stock": {
-                        "name": "Deutsche Post",
-                        "price": 1,
-                        "numberAvailable": 100000
-                    },
-                    "number": 0
-                },
-                {
-                    "stock": {
-                        "name": "Deutsche Telekom",
-                        "price": 19.14,
-                        "numberAvailable": 100000
-                    },
-                    "number": 0
-                },
-                {
-                    "stock": {
-                        "name": "Deutsche Wohnen",
-                        "price": 1,
-                        "numberAvailable": 100000
-                    },
-                    "number": 0
-                }
-            ],
-            "value": 0
-        };
-    }
     try {
-        const response = await fetch('api/account');
+        const response = await fetch('/api/account');
         switch (response.status) {
             case 200:
                 return {
@@ -186,56 +56,8 @@ async function getAccount() {
  * @returns {Promise<Object|null>} Nachrichten | null bei Fehler
  */
 async function getMessages(lastTime) {
-    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-    if (isLocalhost) {
-        console.warn('Lokale Entwicklung – simuliere Nachrichten => getMessages()');
-        return [
-            {
-                "sender": "max",
-                "recipient": "moritz",
-                "text": "Hey, hast du schon die neue Aktie gekauft?",
-                "date": "2025-11-12T10:15:30Z"
-            },
-            {
-                "sender": "moritz",
-                "recipient": "max",
-                "text": "Ja, ich hab 5 Stück von 'Deutsche Telekom' gekauft. Preis war super!",
-                "date": "2025-11-12T10:17:45Z"
-            },
-            {
-                "sender": "lempel",
-                "recipient": "all",
-                "text": "📢 WICHTIG: Der Kurs von 'BMW' steigt stark! Kauft jetzt!",
-                "date": "2025-11-12T09:55:12Z"
-            },
-            {
-                "sender": "bolte",
-                "recipient": "lempel",
-                "text": "Danke für den Tipp! Hab 10 Stück gekauft. 🚀",
-                "date": "2025-11-12T09:58:33Z"
-            },
-            {
-                "sender": "max",
-                "recipient": "all",
-                "text": "Ich verkaufe meine 'Covestro'-Anteile. Preis fällt stark.",
-                "date": "2025-11-12T08:42:11Z"
-            },
-            {
-                "sender": "moritz",
-                "recipient": "bolte",
-                "text": "Hast du auch 'Adidas' gekauft? Ich denke, die wird bald steigen.",
-                "date": "2025-11-11T17:22:05Z"
-            },
-            {
-                "sender": "lempel",
-                "recipient": "max",
-                "text": "Warum verkaufst du? Ich halte fest!",
-                "date": "2025-11-11T16:55:10Z"
-            }
-        ];
-    }
     try {
-        let url = 'api/messages';
+        let url = '/api/messages';
         // wurde ein param übergeben?
         if (lastTime !== undefined) {
             url += `?lastTime=${lastTime}`;
@@ -297,47 +119,6 @@ async function getMessages(lastTime) {
  * @returns {Promise<Object|null>} News | null bei Fehler
  */
 async function getNews(lastTime) {
-    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-
-    if (isLocalhost) {
-        console.warn('Lokale Entwicklung – simuliere News. => getNews()');
-        const now = Math.floor(Date.now() / 1000);
-        const simulatedNews = [
-            {
-                "timestamp": now,
-                "time": new Date(now * 1000).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'}),
-                "text": "📈 Neue Kursprognose: 'BMW' wird in den nächsten 24h steigen"
-            },
-            {
-                "timestamp": now - 1000, // 1000 Sekunden älter
-                "time": new Date((now - 1000) * 1000).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'}),
-                "text": "🚨 Warnung: 'Covestro' Kurs fällt stark – Verkaufen empfohlen"
-            },
-            {
-                "timestamp": now - 2000,
-                "time": new Date((now - 2000) * 1000).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'}),
-                "text": "💡 Tipp: 'Deutsche Telekom' zeigt stabiles Wachstum – Halten lohnt sich"
-            },
-            {
-                "timestamp": now - 3000,
-                "time": new Date((now - 3000) * 1000).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'}),
-                "text": "📢 Wichtig: Neue Aktie 'Tesla' wurde hinzugefügt"
-            },
-            {
-                "timestamp": now - 4000,
-                "time": new Date((now - 4000) * 1000).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'}),
-                "text": "📊 Marktbericht: Gesamtumsatz gestern: 2.345.678 €"
-            }
-        ];
-
-        // Filtere nach lastTime, wenn angegeben
-        if (lastTime !== undefined) {
-            return simulatedNews.filter(item => item.timestamp > lastTime);
-        }
-        return simulatedNews;
-    }
-
-    // In prod
     try {
         let url = '/api/news';
         if (lastTime !== undefined) {
@@ -397,89 +178,8 @@ async function getNews(lastTime) {
  * @returns {Promise<any|null>} Liste von Aktien | null bei Fehler
  */
 async function getStocks() {
-    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-    if (isLocalhost) {
-        console.warn('lokale Testumgebung');
-        return [
-            {
-                "name": "adidas",
-                "price": 1,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Allianz",
-                "price": 1,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "BASF",
-                "price": 46.94,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Bayer",
-                "price": 25.99,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Beiersdorf",
-                "price": 1,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "BMW",
-                "price": 10.79,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Continental",
-                "price": 1,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Covestro",
-                "price": 1,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Daimler",
-                "price": 251.34,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Delivery Hero",
-                "price": 1.95,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Deutsche Bank",
-                "price": 1,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Deutsche Börse",
-                "price": 64.35,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Deutsche Post",
-                "price": 44.12,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Deutsche Telekom",
-                "price": 1,
-                "numberAvailable": 100000
-            },
-            {
-                "name": "Deutsche Wohnen",
-                "price": 409.05,
-                "numberAvailable": 100000
-            }
-        ];
-    }
     try {
-        const response = await fetch('api/stocks');
+        const response = await fetch('/api/stocks');
         switch (response.status) {
             case 200:
                 return {
@@ -523,15 +223,6 @@ async function getStocks() {
  * @returns {Promise<{success: boolean, data?: {name: string, balance: number}, error?: {status: number, message: string}}>} Ergebnis
  */
 async function getUser() {
-    // FÜR TESTEN
-    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-    if (isLocalhost) {
-        console.warn('lokale Testumgebung');
-        return {
-            "name": "lempel",
-            "balance": 10000
-        };
-    }
     try {
         const response = await fetch('/api/user');
         switch (response.status) {
@@ -577,28 +268,6 @@ async function getUser() {
  * @returns {Promise<any|null>} Objekt {name,balance} | null bei Fehler
  */
 async function getEverybody() {
-    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-    if (isLocalhost) {
-        console.warn('lokale Testumgebung getEverybody()');
-        return [
-            {
-                "name": "max",
-                "sum": 10000
-            },
-            {
-                "name": "moritz",
-                "sum": 10000
-            },
-            {
-                "name": "lempel",
-                "sum": 10000
-            },
-            {
-                "name": "bolte",
-                "sum": 10000
-            }
-        ];
-    }
     try {
         const response = await fetch('/api/user/everybody');
         switch (response.status) {
@@ -664,7 +333,7 @@ async function postPositions(stockName, number) {
         return null;
     }
     try {
-        const response = await fetch('api/account/positions', {
+        const response = await fetch('/api/account/positions', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -746,7 +415,7 @@ async function postMessages(recipient, message) {
         return null;
     }
     try {
-        const response = await fetch('api/messages', {
+        const response = await fetch('/api/messages', {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'

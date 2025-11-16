@@ -34,13 +34,20 @@ function displayUser(userData) {
 function displayRanking(rankingData) {
     // dom elemente holen
     const container = document.getElementById('ranking-list-container');
+    const children = Array.from(container.children);
+    const rankingTemplate = document.getElementById('ranking-item-template');
 
     // checks
     if (!container) {
         console.error("Element mit der id 'ranking-list-container' nicht gefunden");
     }
 
-    const rankingTemplate = document.getElementById('ranking-item-template');
+    children.forEach(child => {
+        if (child !== rankingTemplate) {
+            container.removeChild(child);
+        }
+    });
+
     if (!rankingTemplate) {
         console.error('Template mit id "ranking-item-template" nicht gefunden.');
         // console.log('Vorhandene Templates:', document.querySelectorAll('template'));
@@ -104,7 +111,7 @@ function displayStocks(stocksData) {
             style: 'currency',
             currency: 'EUR'
         }).format(stock.price);
-        if (availableEl) availableEl.textContent = `Verfügbar: ${stock.numberAvailable}`;
+        if (availableEl) availableEl.textContent = `/ ${stock.numberAvailable}`;
 
         container.appendChild(clone);
     });
@@ -281,7 +288,7 @@ function populateAssetSelector(stocks) {
     }
     const defaultOption = document.createElement('option');
     defaultOption.value = 'default';
-    defaultOption.textContent = "-"
+    defaultOption.textContent = "-";
     select.appendChild(defaultOption);
 
     stocks.forEach(stock => {
@@ -292,14 +299,19 @@ function populateAssetSelector(stocks) {
     });
 }
 
-// Funktion: Fülle die Empfänger-Select-Box mit allen Nutzern
-async function populateRecipientSelector() {
-    const select = document.getElementById('recipient-selector');
-    if (!select) return;
+let selectedRecipients = new Set();
 
-    // Leere Select
-    while (select.firstChild) {
-        select.removeChild(select.firstChild);
+// Funktion: Fülle die Empfänger-Select-Box mit allen Nutzern (ersetzt Select mit Buttons)
+async function populateRecipientSelector() {
+    const container = document.getElementById('recipient-selector-container');
+    if (!container) {
+        console.error("Element mit ID 'recipient-selector-container' nicht gefunden.");
+        return;
+    }
+
+    // Leere Container
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
     }
 
     try {
@@ -307,21 +319,43 @@ async function populateRecipientSelector() {
         const result = await getEverybody();
 
         if (result.success) {
+            console.log("Empfänger-Daten von Server:", result.data); // <-- Debug-Ausgabe
             const users = result.data;
-            // Für jeden Nutzer: Option hinzufügen
+            // Für jeden Nutzer: Button hinzufügen
             users.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.name;
-                option.textContent = user.name;
-                select.appendChild(option);
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'recipient-btn';
+                button.textContent = user.name;
+                button.setAttribute('data-recipient-name', user.name);
+
+                // Event-Listener zum Umschalten der Auswahl
+                button.addEventListener('click', () => {
+                    if (selectedRecipients.has(user.name)) {
+                        selectedRecipients.delete(user.name);
+                        button.classList.remove('selected');
+                    } else {
+                        selectedRecipients.add(user.name);
+                        button.classList.add('selected');
+                    }
+                    console.log('Ausgewählte Empfänger:', Array.from(selectedRecipients));
+                });
+
+                container.appendChild(button);
             });
         } else {
+            console.error("Fehler bei getEverybody():", result.error);
             showToast(result.error.message, result.error.status);
         }
     } catch (e) {
         console.error('Fehler beim Laden der Nutzer:', e.message);
-        showToast(result.error.status, result.error.message);
+        showToast("Fehler beim Laden der Nutzer", e.message);
     }
+}
+
+// Funktion: Hole die aktuell ausgewählten Empfänger (in functions.js)
+function getSelectedRecipients() {
+    return Array.from(selectedRecipients);
 }
 
 // Zeige toast (aufgerufen in api-client, wenn !response.ok)
@@ -368,4 +402,8 @@ window.displayMessages = displayMessages;
 window.displayNews = displayNews;
 window.populateAssetSelector = populateAssetSelector;
 window.populateRecipientSelector = populateRecipientSelector;
+// Stelle sicher, dass auch getSelectedRecipients global verfügbar ist, damit main.js darauf zugreifen kann
+window.getSelectedRecipients = getSelectedRecipients;
+// Optional: selectedRecipients global machen, falls andere Teile es direkt lesen/ändern müssen
+// window.selectedRecipients = selectedRecipients;
 window.showToast = showToast;

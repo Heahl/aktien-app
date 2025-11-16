@@ -13,6 +13,7 @@ async function init() {
     const reviewOrderBtn = document.getElementById('review-order');
     const sendBtn = document.getElementById('send-message');
 
+    // === INITIALE DATEN LADEN ===
     const userResult = await getUser();
     if (userResult.success) {
         displayUser(userResult.data);
@@ -99,8 +100,8 @@ async function init() {
         setAmount(0);
         document.getElementById('asset-selector').value = 'default';
 
-        // Optional: Depot aktualisieren
-        console.log('Aktualisiere Depot...');
+        // === SOFORT AKTUALISIEREN NACH TRANSAKTION ===
+        console.log('Aktualisiere Depot und Nutzerdaten...');
         const accountResult = await getAccount();
         if (accountResult.success) {
             console.log('Neue Depot-Daten:', accountResult.data);
@@ -109,7 +110,17 @@ async function init() {
             console.log('Fehler beim Aktualisieren des Depots:', accountResult.error);
             showToast(accountResult.error.message, accountResult.error.status);
         }
-        console.log('Depot aktualisiert');
+
+        const userResult = await getUser();
+        if (userResult.success) {
+            displayUser(userResult.data);
+        } else {
+            showToast(userResult.error.message, userResult.error.status);
+        }
+
+        // Chart aktualisieren
+        await renderCharts();
+        console.log('Depot, Nutzerdaten und Chart aktualisiert');
     });
 
     // Funktion: Setze die Anzahl in das Input-Feld
@@ -156,11 +167,7 @@ async function init() {
     await populateRecipientSelector();
 
     sendBtn.addEventListener('click', async () => {
-        // Hole Empfänger
-        const selectedOptions = Array.from(
-            document.getElementById('recipient-selector').selectedOptions
-        );
-        const recipients = selectedOptions.map(option => option.value);
+        const recipients = getSelectedRecipients();
 
         const message = document.getElementById('message-text').value.trim();
 
@@ -179,13 +186,16 @@ async function init() {
 
         // zeige Ergebnis
         const successful = results.filter(r => r.result.success).length;
-        alert(`Nachricht an ${successful} von ${recipients.length} Empfängern gesendet.`);
 
-        // Zurücksetzen
+        selectedRecipients.clear();
+        const allButtons = document.querySelectorAll('#recipient-selector-container .recipient-btn');
+        allButtons.forEach(btn => btn.classList.remove('selected'));
+
+        // Zurücksetzen der Nachricht
         document.getElementById('message-text').value = '';
-        selectedOptions.forEach(option => option.selected = false);
 
-        // nachrichten aktualisieren
+        // === SOFORT AKTUALISIEREN NACH NACHRICHTENSENDEN ===
+        console.warn('Aktualisiere Nachrichten...');
         const messagesResult = await getMessages();
         if (messagesResult.success) {
             displayMessages(messagesResult.data);
@@ -194,9 +204,62 @@ async function init() {
         }
     });
 
+    // === POLLING MIT SETINTERVAL ===
+    console.log("Starte Polling-Intervalle...");
 
-    // intervals
-    setInterval(renderCharts, 5000);
+    // Kurse + Chart (5 Sekunden)
+    const stocksInterval = setInterval(async () => {
+        const result = await getStocks();
+        if (result.success) {
+            displayStocks(result.data);
+            await renderCharts(); // Chart braucht aktuelle Kurse
+        }
+    }, 5000);
+
+    // Depot + Nutzer (30 Sekunden)
+    const accountInterval = setInterval(async () => {
+        const accountResult = await getAccount();
+        if (accountResult.success) {
+            displayDepot(accountResult.data);
+        }
+
+        const userResult = await getUser();
+        if (userResult.success) {
+            displayUser(userResult.data);
+        }
+    }, 30000);
+
+    // Rangliste (60 Sekunden)
+    const rankingInterval = setInterval(async () => {
+        const result = await getEverybody();
+        if (result.success) {
+            displayRanking(result.data);
+        }
+    }, 60000);
+
+    // Nachrichten (15 Sekunden)
+    const messagesInterval = setInterval(async () => {
+        const result = await getMessages();
+        if (result.success) {
+            displayMessages(result.data);
+        }
+    }, 15000);
+
+    // News (60 Sekunden)
+    const newsInterval = setInterval(async () => {
+        const result = await getNews();
+        if (result.success) {
+            displayNews(result.data);
+        }
+    }, 60000);
+
+    // Chart aktualisieren (5 Sekunden) – bereits in stocksInterval enthalten
+
+    // Starte Trading-Strategie
+    setInterval(() => {
+        window.tradingStrategy.updateAllStocks();
+        window.tradingStrategy.autoTrade();
+    }, 500); // Alle 500 Millisekunden
 }
 
 // === ENDE init() ===

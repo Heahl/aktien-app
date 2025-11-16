@@ -12,6 +12,7 @@
     <!-- <script src="javascripts/auth/deauth.js" defer></script> -->
     <script src="javascripts/api/api-client.js" defer></script>
     <script src="javascripts/ui/ui-updater.js" defer></script>
+    <script src="javascripts/trading/trading-strategy.js"></script>
     <!-- alle scripts vor diesem einbinden -->
     <script src="javascripts/main.js" defer></script>
     <title>Dashboard</title>
@@ -30,14 +31,16 @@
 <main>
     <!-- Aktienkurse -->
     <section id="stock-container">
-        <h1 id="asset-name"></h1>
-        <span id="price"></span>
-        <span id="numberAvailable"></span>
-        <section class="depot">
-            <div class="stock-chart-container">
-                <canvas class="stock-chart" height="100" width="200"></canvas>
+        <canvas class="stock-chart" height="100" width="200"></canvas>
+    </section>
+    <!-- Portfolio des Spielers -->
+    <section id="portfolio-container">
+        <template id="portfolio-template">
+            <div class="portfolio-item">
+                <span class="portfolio-name"></span>
+                <span class="portfolio-value"></span>
             </div>
-        </section>
+        </template>
     </section>
     <!-- Kaufen/Verkaufen -->
     <section id="depot">
@@ -49,9 +52,8 @@
             </div>
         </div>
         <div class="trading-field">
-            <label for="amount">Anzahl</label>
+            <label for="amount">Anzahl Aktien</label>
             <input type="number" id="amount" placeholder="0" step="1" min="1">
-            <span>Aktien</span>
         </div>
         <div class="quick-select">
             <button class="quick-select-btn" data-amount="1">1</button>
@@ -65,12 +67,16 @@
         </div>
         <button id="review-order" class="review-button">Bestellung prüfen</button>
     </section>
-    <!-- Portfolio des Spielers -->
-    <section id="portfolio-container">
-        <template id="portfolio-template">
-            <div class="portfolio-item">
-                <span class="portfolio-name"></span>
-                <span class="portfolio-value"></span>
+    <!-- Nachrichten -->
+    <section id="message-container">
+        <template id="message-template">
+            <div class="message-item">
+                <div class="sender-receiver">
+                    <span class="message-sender"></span>
+                    <span class="message-recipient"></span>
+                </div>
+                <span class="message-text"></span>
+                <span class="message-date"></span>
             </div>
         </template>
     </section>
@@ -84,22 +90,12 @@
             </div>
         </template>
     </section>
-    <!-- Rangliste aller Spieler -->
-    <section id="ranking-list-container">
-        <div id="test"></div>
-        <template id="ranking-item-template">
-            <div id="test1"></div>
-            <span class="rank-column"></span>
-            <span class="player-column"></span>
-            <span class="value-column"></span>
-        </template>
-    </section>
     <!-- News -->
     <section id="news-container">
         <div class="news-controls">
-            <button id="newsLastHour">Letzte Stunde</button>
-            <button id="newsLastDay">Letzter Tag</button>
-            <button id="newsLastTwenty">Alle News</button>
+            <button id="newsLastHour">Stunde</button>
+            <button id="newsLastDay">Tag</button>
+            <button id="newsLastTwenty">Alle</button>
         </div>
         <template id="news-template">
             <div class="news-item">
@@ -108,30 +104,29 @@
             </div>
         </template>
     </section>
-    <!-- Nachrichten -->
-    <section id="message-container">
-        <template id="message-template">
-            <div class="message-item">
-                <span class="message-sender"></span>
-                <span class="message-recipient"></span>
-                <span class="message-text"></span>
-                <span class="message-date"></span>
+    <!-- Rangliste aller Spieler -->
+    <section id="ranking-list-container">
+        <template id="ranking-item-template">
+            <div class="ranking-item">
+                <span class="rank-column"></span>
+                <span class="player-column"></span>
+                <span class="value-column"></span>
             </div>
         </template>
     </section>
+
     <!-- Nachrichten senden -->
     <section id="message-sender">
-        <h2>Nachricht senden</h2>
-        <div class="message-field">
-            <label for="recipient-selector">Empfänger:</label>
-            <select name="recipient-selector" id="recipient-selector" multiple>
-            </select>
-            <small>Halte STRG gedrückt, um mehrere auszuwählen</small>
-        </div>
         <div class="message-field">
             <label for="message-text">Nachricht:</label>
             <textarea id="message-text" placeholder="Nachricht eingeben..."></textarea>
         </div>
+        <div class="message-field">
+            <label>Empfänger:</label>
+            <div id="recipient-selector-container" class="recipient-selector-container">
+            </div>
+        </div>
+
         <button id="send-message" class="send-button">Nachricht senden</button>
     </section>
     <!-- Toast (wird bei Fehlermeldungen eingeblendet -->
