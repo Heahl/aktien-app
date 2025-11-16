@@ -1,9 +1,9 @@
 "use strict";
 
 /**
- * Zeigt username und account balance des Nutzers an
+ * Zeigt username und account balance des Nutzers an.
  *
- * @param userData :Object von getUser() übergebene Nutzerdaten
+ * @param userData :Object von getUser() übergebene Nutzerdaten.
  */
 function displayUser(userData) {
     // dom elemente holen
@@ -27,9 +27,9 @@ function displayUser(userData) {
 }
 
 /**
- * Zeige die Rangliste an
+ * Zeige die Rangliste an.
  *
- * @param rankingData :Object mit Namen + summe von balance und depot value von allen Nutzern
+ * @param rankingData :Object mit Namen + summe von balance und depot value von allen Nutzern.
  */
 function displayRanking(rankingData) {
     // dom elemente holen
@@ -68,7 +68,7 @@ function displayRanking(rankingData) {
 /**
  * Zeigt eine Liste mit allen Aktien, deren Werten und Verfügbarkeit an.
  *
- * @param stocksData :Object von getStocks übergebene Daten
+ * @param stocksData :Object von getStocks übergebene Daten.
  */
 function displayStocks(stocksData) {
     const container = document.getElementById('stocks-container');
@@ -113,7 +113,7 @@ function displayStocks(stocksData) {
 /**
  * Füllt das Selector Element zur Auswahl einzelner Aktien mit den Namen aller Unternehmen im depot.
  *
- * @param stocks :Object von getStocks() übergebene Daten
+ * @param stocks :Object von getStocks() übergebene Daten.
  */
 function stockSelector(stocks) {
     const selectElement = document.getElementById('stockSelector');
@@ -135,9 +135,9 @@ function stockSelector(stocks) {
 }
 
 /**
- * Zeigt alle Nachrichten mit Sender, Empfänger, Text und Datum an
+ * Zeigt alle Nachrichten mit Sender, Empfänger, Text und Datum an.
  *
- * @param messagesData :[{}] von getMessages übergebene Daten
+ * @param messagesData :[{}] von getMessages übergebene Daten.
  */
 function displayMessages(messagesData) {
     const container = document.getElementById('message-container');
@@ -187,6 +187,11 @@ function displayMessages(messagesData) {
     })
 }
 
+/**
+ * Rendert Neuigkeiten im UI über HTML-Template.
+ *
+ * @param {{time: string, text: string}[]} news - Liste der News-Objekte.
+ */
 function displayNews(news) {
     // dom anfassen
     const container = document.getElementById('news-container');
@@ -222,6 +227,11 @@ function displayNews(news) {
     })
 }
 
+/**
+ * Zeigt das Depot des Nutzers bzw. gehaltene Aktien an.
+ *
+ * @param {{positions: {stock: {name: string}, number: number}[]}} accountData - Depotdaten.
+ */
 function displayDepot(accountData) {
     const container = document.getElementById('portfolio-container');
     const template = document.getElementById('portfolio-template');
@@ -270,6 +280,11 @@ function displayDepot(accountData) {
     });
 }
 
+/**
+ * Füllt das Aktien-dropdown mit allen verfügbaren Aktien.
+ *
+ * @param {{name: string}[]} stocks - Liste aller Aktien.
+ */
 function populateAssetSelector(stocks) {
     const select = document.getElementById('asset-selector');
     if (!select) {
@@ -292,7 +307,11 @@ function populateAssetSelector(stocks) {
     });
 }
 
-// Funktion: Fülle die Empfänger-Select-Box mit allen Nutzern
+/**
+ * Befüllt das Empfänger-Dropdown für Nachrichten mit allen Nutzern aus getEverybody().
+ *
+ * @returns {Promise<void>}.
+ */
 async function populateRecipientSelector() {
     const select = document.getElementById('recipient-selector');
     if (!select) return;
@@ -324,7 +343,13 @@ async function populateRecipientSelector() {
     }
 }
 
-// Zeige toast (aufgerufen in api-client, wenn !response.ok)
+/**
+ * Zeigt eine Toast-Benachrichtigung an.
+ *
+ * @param {string} message - Fehlermeldung oder Info.
+ * @param {number|string} status - HTTP-Statuscode oder andere Info.
+ * @param {"error"|"success"|"warning"} [type="error"] - Art des Toasts.
+ */
 function showToast(message, status, type = "error") {
     const container = document.getElementById('toast-container');
     const template = document.getElementById('toast-template');

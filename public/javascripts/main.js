@@ -2,6 +2,15 @@
 
 document.addEventListener('DOMContentLoaded', init);
 
+/**
+ * Initialisiert die gesamte Anwendung:
+ *  - Holt Benutzer-, Depot-, Aktien-, Nachrichten- und Ranking-Daten;
+ *  - Rendert UI-Bereiche (User, Depot, Aktien, Ranking);
+ *  - Richtet alle Event Listener für Kauf/Verkauf, News-FilterQuick-Amount-Buttons und Nachrichtenversand ein;
+ *  - Führt erste API-Calls aus und behandelt Fehler über Toasts.
+ *
+ * @returns {Promise<void>}
+ */
 async function init() {
     // elemente greifen
     const newsLastHourBtn = document.getElementById('newsLastHour');
@@ -112,7 +121,11 @@ async function init() {
         console.log('Depot aktualisiert');
     });
 
-    // Funktion: Setze die Anzahl in das Input-Feld
+    /**
+     * Setzt die Anzahl in das Mengen-Inputfeld.
+     *
+     * @param {number} amount - Die zu setzende Anzahl.
+     */
     function setAmount(amount) {
         const amountInput = document.getElementById('amount');
         if (amountInput) {
@@ -201,7 +214,11 @@ async function init() {
 
 // === ENDE init() ===
 
-
+/**
+ * Lädt News ab einem bestimmten Zeitpunkt in der Vergangenheit und rendert sie im UI.
+ *
+ * @param secondsAgo - Anzahl der Sekunden, die von der aktuellen Zeit abgezogen werden sollen.
+ */
 function loadNewsSince(secondsAgo) {
     // aktueller unix timestamp
     const now = Math.floor(Date.now() / 1000);
@@ -227,6 +244,13 @@ function loadNewsSince(secondsAgo) {
 // globales objekt zum Speichern der Historie
 window.stockHistory = {};
 
+/**
+ * Erzeugt Chart-Daten für alle verfügbaren Aktien.
+ * Holt die aktuellen Kurse, speichert sie in window.stockHistory
+ * und gibt formatiere Labels und Datasets für Chart.js zurück.
+ *
+ * @returns {Promise<{labels: string[], datasets: Object[]}>} - Objekt mit Zeitlabels und Datensätzen für jede Aktie.
+ */
 async function generateChartData() {
     // hole aktuelle kurse
     const stocksResult = await getStocks();
@@ -301,6 +325,12 @@ async function generateChartData() {
     };
 }
 
+/**
+ * Rendert das Aktienkurs-Diagramm, holt vorbereitete Chart-Daten, zerstört ggf. das alte Chart.
+ * und erzeugt ein neues Chart.js-Liniendiagramm.
+ *
+ * @returns {Promise<void>}.
+ */
 async function renderCharts() {
     const chartData = await generateChartData();
 
@@ -342,6 +372,13 @@ async function renderCharts() {
     });
 }
 
+/**
+ * Sendet eine Nachricht an mehrere Empfänger, nacheinander.
+ *
+ * @param {string[]} recipients - Liste der Nutzer, an die die Nachricht gesendet wird.
+ * @param {string} message - Der zu sendende Nachrichtentext.
+ * @returns {Promise<{recipient: string, result: Object}[]>} Liste mit Ergebnissen pro Empfänger.
+ */
 async function sendMessagesToMultiple(recipients, message) {
     console.log('Sende nachricht an mehrere Empfänger: ', recipients);
 
