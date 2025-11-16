@@ -2,6 +2,9 @@
 
 window.addEventListener('load', auth);
 
+/**
+ * Initialisiert das Login-Formular und registriert den submit-Listener.
+ */
 function auth() {
     // get dom elements
     const loginForm = document.getElementById('login-form');
@@ -10,6 +13,13 @@ function auth() {
     // add event-listeners
     loginForm.addEventListener('submit', login);
 }
+
+/**
+ * Führt den Login-Prozess aus: prüft Eingaben.
+ * Speichert das Token im localStorage und leitet weiter.
+ *
+ * @param {SubmitEvent} event - Das submit-Event des Formulars.
+ */
 
 function login(event) {
     // No default action

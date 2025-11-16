@@ -1,5 +1,11 @@
 "use strict";
 
+/**
+ * Prüft, ob der Nutzer eingeloggt ist, validiert das Token aus dem localStorage und prüft.
+ * Ablaufzeit und redirected bei Fehler.
+ *
+ * @returns {boolean} true, wenn gültig; false bei Weiterleitung zum Login.
+ */
 function authCheck(){
     const token = localStorage.getItem('stockmarketVerySecretAuthToken');
 
