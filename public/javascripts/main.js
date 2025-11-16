@@ -69,16 +69,16 @@ async function init() {
         });
     });
     reviewOrderBtn.addEventListener('click', async () => {
-        console.log('Review Order Button geklickt');
+        // // console.log('Review Order Button geklickt');
 
         const assetName = document.getElementById('asset-selector').value;
-        console.log('Asset Name:', assetName);
+        // // console.log('Asset Name:', assetName);
 
         const amount = parseInt(document.getElementById('amount').value);
-        console.log('Amount:', amount);
+        // // console.log('Amount:', amount);
 
         const isBuy = document.getElementById('buy-tab').classList.contains('active');
-        console.log('isBuy:', isBuy);
+        // // console.log('isBuy:', isBuy);
 
         if (!assetName || !amount || isNaN(amount) || amount <= 0) {
             console.error('Ungültige Eingabe:', {assetName, amount, isBuy});
@@ -86,37 +86,37 @@ async function init() {
             return;
         }
 
-        console.log('Sende Transaktion an Server...');
+        // // console.log('Sende Transaktion an Server...');
         let result;
         if (isBuy) {
-            console.log('Kaufe Aktien:', assetName, 'Anzahl:', amount);
+            // // console.log('Kaufe Aktien:', assetName, 'Anzahl:', amount);
             result = await postPositions(assetName, amount);
         } else {
-            console.log('Verkaufe Aktien:', assetName, 'Anzahl:', amount);
+            // // console.log('Verkaufe Aktien:', assetName, 'Anzahl:', amount);
             result = await postPositions(assetName, -amount);
         }
 
         if (result.success) {
-            console.log('Transaktion erfolgreich:', result.data);
+            // // console.log('Transaktion erfolgreich:', result.data);
             showToast('Transaktion erfolgreich!', 201, 'success');
         } else {
-            console.log('Transaktion fehlgeschlagen:', result.error);
+            // // console.log('Transaktion fehlgeschlagen:', result.error);
             showToast(result.error.message, result.error.status);
         }
 
         // Zurücksetzen
-        console.log('Setze Formular zurück');
+        // // console.log('Setze Formular zurück');
         setAmount(0);
         document.getElementById('asset-selector').value = 'default';
 
         // === SOFORT AKTUALISIEREN NACH TRANSAKTION ===
-        console.log('Aktualisiere Depot und Nutzerdaten...');
+        // // console.log('Aktualisiere Depot und Nutzerdaten...');
         const accountResult = await getAccount();
         if (accountResult.success) {
-            console.log('Neue Depot-Daten:', accountResult.data);
+            // // console.log('Neue Depot-Daten:', accountResult.data);
             displayDepot(accountResult.data);
         } else {
-            console.log('Fehler beim Aktualisieren des Depots:', accountResult.error);
+            // // console.log('Fehler beim Aktualisieren des Depots:', accountResult.error);
             showToast(accountResult.error.message, accountResult.error.status);
         }
 
@@ -129,7 +129,7 @@ async function init() {
 
         // Chart aktualisieren
         await renderCharts();
-        console.log('Depot, Nutzerdaten und Chart aktualisiert');
+        // // console.log('Depot, Nutzerdaten und Chart aktualisiert');
     });
 
     /**
@@ -218,7 +218,7 @@ async function init() {
     });
 
     // === POLLING MIT SETINTERVAL ===
-    console.log("Starte Polling-Intervalle...");
+    // // console.log("Starte Polling-Intervalle...");
 
     // Kurse + Chart (5 Sekunden)
     const stocksInterval = setInterval(async () => {
@@ -287,7 +287,7 @@ function loadNewsSince(secondsAgo) {
     const now = Math.floor(Date.now() / 1000);
     const lastTime = now - secondsAgo;
 
-    // console.log('loadNewsSince aufgerufen mit lastTime:', lastTime);
+    // // // console.log('loadNewsSince aufgerufen mit lastTime:', lastTime);
 
     getNews(lastTime)
         .then(result => {
@@ -324,7 +324,7 @@ async function generateChartData() {
     }
     const allStocks = stocksResult.data;
 
-    // console.log('allStocks:', allStocks);
+    // // // console.log('allStocks:', allStocks);
     // Zeitstempel hinzufügen
     const now = Date.now();
 
@@ -346,13 +346,13 @@ async function generateChartData() {
 
     // Zeitstempel von der ersten Aktie nehmen
     const firstStockName = allStocks[0]?.name;
-    // console.log('firstStockName:', firstStockName);
+    // // // console.log('firstStockName:', firstStockName);
     const labels = window.stockHistory[firstStockName]?.map(item => {
         const date = new Date(item.timestamp);
         return date.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
     }) || [];
 
-    // console.log('labels:', labels);
+    // // // console.log('labels:', labels);
     // Daten für jede Aktie aufbereiten
     const datasets = allStocks.map((stock, index) => {
         // Farbe für die Linie festlegen
@@ -369,7 +369,7 @@ async function generateChartData() {
         const color = colors[index % colors.length];
         const data = window.stockHistory[stock.name]?.map(item => item.price) || [];
 
-        // console.log('dataset data for', stock.name, ':', data);
+        // // // console.log('dataset data for', stock.name, ':', data);
 
         return {
             label: stock.name,
@@ -381,7 +381,7 @@ async function generateChartData() {
         };
     });
 
-    // console.log('datasets:', datasets);
+    // // // console.log('datasets:', datasets);
     return {
         labels: labels,
         datasets: datasets
@@ -443,15 +443,15 @@ async function renderCharts() {
  * @returns {Promise<{recipient: string, result: Object}[]>} Liste mit Ergebnissen pro Empfänger.
  */
 async function sendMessagesToMultiple(recipients, message) {
-    console.log('Sende nachricht an mehrere Empfänger: ', recipients);
+    // // console.log('Sende nachricht an mehrere Empfänger: ', recipients);
 
     const results = [];
 
     for (const recipient of recipients) {
-        console.log("Sende Nachricht an: ", recipient);
+        // // console.log("Sende Nachricht an: ", recipient);
         const result = await postMessages(recipient, message);
         results.push({recipient, result});
-        console.log("Ergebnis für", recipient, ':', result);
+        // // console.log("Ergebnis für", recipient, ':', result);
     }
     return results;
 }
