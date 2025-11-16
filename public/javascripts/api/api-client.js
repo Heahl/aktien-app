@@ -3,9 +3,9 @@
 // === GET ===
 
 /**
- * Holt die Depot Positionen des authentifizierten Users und seines total depot values
+ * Holt die Depotpositionen des authentifizierten Users und seines total depot values.
  *
- * @returns {Promise<Object|null>} Depot-Daten oder null bei Fehler
+ * @returns {Promise<Object|null>} Depot-Daten oder null bei Fehler.
  */
 async function getAccount() {
     try {
@@ -48,12 +48,12 @@ async function getAccount() {
 }
 
 /**
- * Holt die Nachrichten der authentifizierten Nutzers,
- * optional nach timestamp gefiltert
- * ohne parameter => erste 20 Nachrichten
+ * Holt die Nachrichten des authentifizierten Nutzers.
+ * Optional nach timestamp gefiltert.
+ * Ohne parameter => erste 20 Nachrichten.
  *
- * @param lastTime timestamp der ältesten zu filternden Nachricht
- * @returns {Promise<Object|null>} Nachrichten | null bei Fehler
+ * @param lastTime timestamp der ältesten zu filternden Nachricht.
+ * @returns {Promise<Object|null>} Nachrichten | null bei Fehler.
  */
 async function getMessages(lastTime) {
     try {
@@ -111,12 +111,12 @@ async function getMessages(lastTime) {
 }
 
 /**
- * Holt news Nachrichten
- * optional nach timestamp gefiltert
- * ohne parameter => erste 20 Nachrichten
+ * Holt news Nachrichten.
+ * optional nach timestamp gefiltert.
+ * ohne parameter => erste 20 Nachrichten.
  *
- * @param lastTime timestamp der ältesten zu filternden Nachricht
- * @returns {Promise<Object|null>} News | null bei Fehler
+ * @param lastTime timestamp der ältesten zu filternden Nachricht.
+ * @returns {Promise<Object|null>} News | null bei Fehler.
  */
 async function getNews(lastTime) {
     try {
@@ -173,9 +173,9 @@ async function getNews(lastTime) {
 }
 
 /**
- * Holt eine Liste aller verfügbaren Aktien auf dem Markt
+ * Holt eine Liste aller verfügbaren Aktien auf dem Markt.
  *
- * @returns {Promise<any|null>} Liste von Aktien | null bei Fehler
+ * @returns {Promise<any|null>} Liste von Aktien | null bei Fehler.
  */
 async function getStocks() {
     try {
@@ -218,9 +218,9 @@ async function getStocks() {
 }
 
 /**
- * Holt den Namen und die balance des authentifizierten Nutzers
+ * Holt den Namen und die balance des authentifizierten Nutzers.
  *
- * @returns {Promise<{success: boolean, data?: {name: string, balance: number}, error?: {status: number, message: string}}>} Ergebnis
+ * @returns {Promise<{success: boolean, data?: {name: string, balance: number}, error?: {status: number, message: string}}>} Ergebnis.
  */
 async function getUser() {
     try {
@@ -263,9 +263,9 @@ async function getUser() {
 }
 
 /**
- * Holt die Summe von balance und depot value von allen Nutzern
+ * Holt die Summe von balance und depot value von allen Nutzern.
  *
- * @returns {Promise<any|null>} Objekt {name,balance} | null bei Fehler
+ * @returns {Promise<any|null>} Objekt {name,balance} | null bei Fehler.
  */
 async function getEverybody() {
     try {
@@ -310,11 +310,11 @@ async function getEverybody() {
 // === POST ===
 
 /**
- * Schreibt kaufen/verkaufen von Aktien in das depot des Nutzers
+ * Schreibt kaufen/verkaufen von Aktien in das depot des Nutzers.
  *
- * @param stockName :string name der Aktie
- * @param number :number Anzahl der zu kaufenden/verkaufenden Positionen
- * @returns {Promise<any|null>} Objekt | null bei Fehler
+ * @param stockName :string name der Aktie.
+ * @param number :number Anzahl der zu kaufenden/verkaufenden Positionen.
+ * @returns {Promise<any|null>} Objekt | null bei Fehler.
  */
 async function postPositions(stockName, number) {
     // Typ prüfen
@@ -393,11 +393,11 @@ async function postPositions(stockName, number) {
 }
 
 /**
- * Sendet Nachrichten an andere Nutzer
+ * Sendet Nachrichten an andere Nutzer.
  *
  * @param recipient :string Empfänger der Nachricht. Broadcast wird von der api nicht unterstützt...
- * @param message :string zu sendende Nachricht
- * @returns {Promise<any|null>} Objekt | null bei Fehler
+ * @param message :string zu sendende Nachricht.
+ * @returns {Promise<any|null>} Objekt | null bei Fehler.
  */
 async function postMessages(recipient, message) {
     // Typ prüfen
