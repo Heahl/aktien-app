@@ -80,9 +80,11 @@ nav {
     justify-content: space-between;
     background-color: var(--neutral-900);
     color: var(--neutral-100);
-    padding: 1rem 1rem;
-    position: absolute;
+    padding: 1rem;
+    position: fixed;
     top: 0;
+    left: 0;
+    z-index: 100;
 }
 
 .navigation-container {
@@ -108,19 +110,58 @@ nav {
     grid-area: portfolio;
 }
 
+/*main {*/
+/*    min-height: 100%;*/
+/*    width: 100%;*/
+/*    display: grid;*/
+/*    gap: .5rem;*/
+/*    margin-top: 3rem;*/
+/*    padding: 1rem;*/
+/*    overflow-x: hidden;*/
+/*    grid-template-areas:*/
+/*            "chart chart stocks depot"*/
+/*            "send send portfolio news"*/
+/*            "messages messages messages news"*/
+/*            "ranking ranking ranking news";*/
+/*}*/
+
+
+/* Version 2 ist schon besser, aber nicht vollkomen ! */
+/*main {*/
+/*    display: grid;*/
+/*    gap: 1rem;*/
+/*    padding: 1rem;*/
+/*    margin-top: 4.5rem;*/
+
+/*    !*grid-template-columns: 2fr 2fr 1.2fr 1.2fr;*!*/
+/*    grid-template-columns: 3fr 1.8fr 1.2fr 1.2fr;*/
+
+/*    grid-template-areas:*/
+/*        "chart chart stocks depot"*/
+/*        "send send portfolio ranking"*/
+/*        "messages messages messages news"*/
+/*        ". . . fehlerMeldung";*/
+/*}*/
+
 main {
-    min-height: 100%;
-    width: 100%;
     display: grid;
-    gap: .5rem;
-    margin-top: 3rem;
+    gap: 1rem;
     padding: 1rem;
-    overflow-x: hidden;
+    margin-top: 5rem;
+
+    grid-template-columns: 1.4fr 2fr 1.8fr 1.2fr;
+
     grid-template-areas:
-            "chart chart stocks depot"
-            "send send portfolio news"
-            "messages messages messages news"
-"ranking ranking ranking news";
+        "chart chart stocks tradingBlock"
+        "send send portfolio news"
+        "messages messages messages fehlerMeldung";
+}
+
+#tradingBlock {
+    grid-area: tradingBlock;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 section {
@@ -131,7 +172,7 @@ section {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    max-height: 30rem;
+    /*max-height: 30rem;*/
 }
 
 h1, h2 {
@@ -156,12 +197,15 @@ h1, h2 {
 /* chart */
 #stock-container {
     grid-area: chart;
-    padding: .8rem;
+    /*padding: .8rem;*/
     grid-column: 1/3;
     background-color: rgba(255, 255, 255, 30%);
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    /*justify-content: flex-end;*/
+    justify-content: flex-start;
+    padding-top: 1.5rem;
+    min-height: 18rem;
 }
 
 .stock-chart {
@@ -231,7 +275,7 @@ h1, h2 {
     color: white;
     border-radius: .2rem;
     border: none;
-    min-width: 3rem;
+    min-width: 4rem;
 }
 
 .quick-select-btn:hover {
@@ -277,24 +321,52 @@ h1, h2 {
 /* ende aktienübersicht */
 
 /* rangliste */
+/*#ranking-list-container {*/
+/*    grid-area: ranking;*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*    justify-content: space-between;*/
+/*    align-items: center;*/
+/*    padding: 1rem;*/
+/*    gap: 2rem;*/
+/*}*/
+
+
+/* TEST */
+
 #ranking-list-container {
     grid-area: ranking;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .5rem;
     padding: 1rem;
-    gap: 2rem;
 }
 
-.ranking-item {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    height: 2rem;
+/*.ranking-item {*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    gap: 1rem;*/
+/*    height: 2rem;*/
+/*    width: 100%;*/
+/*}*/
+
+.ranking-item{
+    display: grid;
+    grid-template-columns: 2rem 1fr auto;
+    gap: 0.5rem;
     width: 100%;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid var(--neutral-300);
 }
+
+/*.ranking-title{*/
+/*    font-size: 1.2rem;*/
+/*    color: var(--neutral-800);*/
+/*    margin-bottom: 0.5rem;*/
+/*    font-weight: 600;*/
+/*}*/
 
 .rank-column {
     font-size: 1.5rem;
@@ -398,7 +470,9 @@ h1, h2 {
     flex-direction: column;
     gap: 0.5rem;
     padding: 0.5rem;
-    height: 100%;
+    /*height: 100%;*/
+    height: auto;
+    max-height: none;
 }
 
 .message-field {
@@ -410,6 +484,10 @@ h1, h2 {
 #message-text {
     font-size: .8rem;
     padding: .5rem;
+    height: 12rem;
+    max-height: 20rem;
+    resize: vertical;
+
 }
 
 #message-sender .message-field:first-of-type {
@@ -502,6 +580,19 @@ h1, h2 {
     position: relative;
 }
 
+#fehlerMeldung {
+    grid-area: fehlerMeldung;
+    background: var(--secondary-50);
+    border-left: 4px solid var(--secondary-800);
+    min-height: 4rem;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--neutral-800);
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+}
+
 .toast-close {
     background: none;
     border: none;
@@ -546,5 +637,39 @@ h1, h2 {
 
     .quick-select-btn {
         min-width: auto;
+    }
+}
+
+
+/* TEST */
+
+@media (max-width: 768px) {
+
+
+    main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 3.5rem;
+
+        section {
+            max-height: none;
+            width: 100%;
+        }
+
+        nav {
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            text-align: center;
+        }
+
+        .ranking-item,
+        .stocks-info,
+        .message-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
     }
 }
