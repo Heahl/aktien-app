@@ -267,7 +267,7 @@ h1, h2 {
     flex-wrap: wrap;
 }
 
-.quick-select-btn {
+.quick-select-btn-buy, .quick-select-btn-sell {
     font-size: .8rem;
     flex: 1;
     padding: var(--btn-padding);
@@ -278,7 +278,7 @@ h1, h2 {
     min-width: 4rem;
 }
 
-.quick-select-btn:hover {
+.quick-select-btn-buy:hover, .quick-select-btn-sell:hover {
     background-color: var(--neutral-400);
 }
 

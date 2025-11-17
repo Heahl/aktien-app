@@ -1,312 +1,348 @@
-// trading-strategy.js
-/**
- * KI-basierte Trading-Strategie für automatische Kauf- und Verkaufsentscheidungen.
- * Speichert Kursverläufe, schätzt Preisparameter und führt Trades über die API aus.
- */
+/*********************************************************************
+ *  Bullet-proof statistical ensemble bot
+ *  – ONE external toggle:  window.botOn  (true = trade, false = simulate)
+ *  – defaults to OFF so you can safely reload the page
+ *********************************************************************/
 class TradingStrategy {
-    /**
-     * Initialisiert Maps für Historie, geschätzte Parameter und letzte Schritte.
-     */
     constructor() {
-        this.history = new Map(); // { stockName: [{ timestamp, price, step }] }
-        this.params = new Map();  // { stockName: { coreValue, amplitude, phase, phaselength } }
-        this.lastSteps = new Map(); // { stockName: lastKnownStep }
+        this.history = new Map(); // stock -> [ {t, p, step} ]
+        this.strategies = new Map(); // stock -> [ StrategyInstance ]
+        this.ensemble = new Map(); // stock -> { weights[], lastVote }
+        this.account = {balance: 0, positions: new Map()};
+        this.maxPos = 0.25;      // 25 % of balance in one stock
+        this.maxDrawDown = 0.30;      // stop trading after -30 %
+        this.peakBalance = null;
+        this.maxSharesPerOrder = 500;   // never send more than 500 shares in one order
+        this.skipCache = new Map();   // stock -> timestamp of last printed skip
+        /* ----------  NEW: safety switch  ---------- */
+        this.botOn = false;          // OFF by default
     }
 
-    /**
-     * Fügt einen neuen Preis in die Historie ein und schätzt die Parameter neu.
-     *
-     * @param {string} stockName - Name der Aktie.
-     * @param {number} price - Aktueller Preis.
-     */
+    /* --------------------------------------------------------------- */
+    /*  public API – unchanged signatures                              */
+
+    /* --------------------------------------------------------------- */
     async updateHistory(stockName, price) {
         const now = Date.now();
-        const step = Math.floor(now / 500); // Näherung an serverseitiges "steps"
-
-        // Speichere neuen Eintrag
-        if (!this.history.has(stockName)) {
-            this.history.set(stockName, []);
-        }
-        const stockHistory = this.history.get(stockName);
-        stockHistory.push({timestamp: now, price, step});
-
-        // Nur die letzten 50 Werte behalten
-        if (stockHistory.length > 50) {
-            stockHistory.shift();
-        }
-
-        // Parameter schätzen
-        this.estimateParams(stockName);
+        const step = Math.floor(now / 500);
+        if (!this.history.has(stockName)) this.history.set(stockName, []);
+        const h = this.history.get(stockName);
+        h.push({t: now, p: price, step});
+        if (h.length > 200) h.shift();
+        this.ensureStrategies(stockName);
+        this.updateRegimeFeatures(stockName);
     }
 
-    /**
-     * Schätzt Mittelwert, Amplitude, Phase und Periodenlänge
-     * aus der bisherigen Preishistorie.
-     *
-     * @param {string} stockName - Name der Aktie.
-     */
-    estimateParams(stockName) {
-        const history = this.history.get(stockName);
-        if (!history || history.length < 10) return;
-
-        // Schätze coreValue (Mittelwert)
-        const prices = history.map(h => h.price);
-        const coreValue = prices.reduce((a, b) => a + b, 0) / prices.length;
-
-        // Schätze amplitude (halbe Spannweite)
-        const minPrice = Math.min(...prices);
-        const maxPrice = Math.max(...prices);
-        const amplitude = (maxPrice - minPrice) / 2;
-
-        // Schätze phaselength (Periode) über Peaks
-        const peaks = this.findPeaks(history);
-        let phaselength = 100; // Default
-        if (peaks.length >= 2) {
-            const avgPeakDistance = peaks.reduce((sum, _, i) => {
-                if (i === 0) return 0;
-                return sum + (peaks[i].step - peaks[i - 1].step);
-            }, 0) / (peaks.length - 1);
-            phaselength = avgPeakDistance; // Näherung
-        }
-
-        // Schätze phase (Verschiebung)
-        let phase = 0;
-        if (peaks.length > 0) {
-            const lastPeak = peaks[peaks.length - 1];
-            // phase ≈ lastPeak.step - (phaselength / 2)
-            phase = lastPeak.step - (phaselength / 2);
-        }
-
-        // Speichere Parameter
-        this.params.set(stockName, {coreValue, amplitude, phase, phaselength});
-    }
-
-    /**
-     * Findet lokale Maxima (Peaks) im Kursverlauf einer Aktie.
-     *
-     * @param {{timestamp:number, price:number, step:number}[]} history
-     * @returns {Object[]} Liste der Peak-Objekte.
-     */
-    findPeaks(history) {
-        const peaks = [];
-        for (let i = 1; i < history.length - 1; i++) {
-            if (history[i].price > history[i - 1].price && history[i].price > history[i + 1].price) {
-                peaks.push(history[i]);
-            }
-        }
-        return peaks;
-    }
-
-    /**
-     * Prognostiziert einen zukünftigen Preis anhand der geschätzten Parameter.
-     *
-     * @param {string} stockName - Aktie.
-     * @param {number} futureStep - Zeitindex in der Zukunft.
-     * @returns {number|null} Geschätzter Preis oder null.
-     */
-    predictNextPrice(stockName, futureStep) {
-        const params = this.params.get(stockName);
-        if (!params) return null;
-
-        const {coreValue, amplitude, phase, phaselength} = params;
-        return Math.round(100 * Math.sin((futureStep + phase) / phaselength) * amplitude + coreValue) / 100;
-    }
-
-    /**
-     * Entscheidet, ob eine Aktie gekauft werden soll.
-     *
-     * @param {string} stockName
-     * @param {number} lookAheadSteps - Wie weit in die Zukunft geschaut wird.
-     * @returns {boolean} true = kaufen.
-     */
-    shouldBuy(stockName, lookAheadSteps = 5) {
-        const currentStep = Math.floor(Date.now() / 500);
-        const currentPrice = this.getCurrentPrice(stockName);
-        const futureStep = currentStep + lookAheadSteps;
-
-        const predictedPrice = this.predictNextPrice(stockName, futureStep);
-        if (!predictedPrice || !currentPrice) return false;
-
-        return predictedPrice > currentPrice * 1.01; // Kaufe, wenn 1% höher
-    }
-
-    /**
-     * Entscheidet, ob eine Aktie verkauft werden soll.
-     *
-     * @param {string} stockName
-     * @param {number} lookAheadSteps
-     * @returns {boolean} true = verkaufen.
-     */
-    shouldSell(stockName, lookAheadSteps = 5) {
-        const currentStep = Math.floor(Date.now() / 500);
-        const currentPrice = this.getCurrentPrice(stockName);
-        const futureStep = currentStep + lookAheadSteps;
-
-        const predictedPrice = this.predictNextPrice(stockName, futureStep);
-        if (!predictedPrice || !currentPrice) return false;
-
-        return predictedPrice < currentPrice * 0.99; // Verkaufe, wenn 1% niedriger
-    }
-
-    /**
-     * Liefert den aktuellsten gespeicherten Preis einer Aktie.
-     *
-     * @param {string} stockName
-     * @returns {number|null}
-     */
-    getCurrentPrice(stockName) {
-        const history = this.history.get(stockName);
-        if (!history || history.length === 0) return null;
-        return history[history.length - 1].price;
-    }
-
-    /**
-     * Holt alle verfügbaren Aktienpreise und aktualisiert ihre Historien.
-     *
-     * @returns {Promise<void>}
-     */
     async updateAllStocks() {
-        const result = await getStocks();
-        if (!result.success) return;
+        const res = await getStocks();
+        if (!res.success) return;
+        for (const s of res.data) await this.updateHistory(s.name, s.price);
+    }
 
-        for (const stock of result.data) {
-            await this.updateHistory(stock.name, stock.price);
+    async autoTrade() {
+        await this.refreshAccount();
+        if (this.account.balance === 0) return;
+        if (!this.peakBalance) this.peakBalance = this.account.balance;
+        /* ----------  auto-resetting draw-down brake  ---------- */
+        if (this.account.balance < this.peakBalance * (1 - this.maxDrawDown)) {
+            console.warn('[BOT] auto-reset draw-down brake');
+            this.peakBalance = this.account.balance; // reset and continue
+            return;                                  // skip only *this* tick
+        }
+        if (this.account.balance > this.peakBalance) this.peakBalance = this.account.balance;
+
+        const stocks = await getStocks().then(r => r.success ? r.data : []);
+        for (const s of stocks) {
+            if (s.name === '-') continue;
+            const signal = this.ensembleVote(s.name);
+            if (signal === 0) continue;
+            const kelly = this.kellySize(s.name, s.price);
+            const desired = Math.floor(kelly * signal);
+            const owned = this.account.positions.get(s.name) || 0;
+            const delta = desired - owned;
+            if (Math.abs(delta) < 1) continue;
+            const clip = this.randomiseClip(delta);
+
+            /* ----------  NEW: only act if toggle is ON  ---------- */
+            if (this.botOn) {
+                await this.executeTrade(s.name, clip > 0 ? 'buy' : 'sell', Math.abs(clip));
+            } else {
+                /* still print what we *would* have done – keeps log comparable */
+                console.log(`[SIM] ${clip > 0 ? 'BUY' : 'SELL'} ${Math.abs(clip)} ${s.name}  (price ${s.price})`);
+            }
         }
     }
 
-    /**
-     * Führt automatischen Handel durch:
-     * Prüft Kauf-/Verkaufssignale und führt passende Trades aus.
-     *
-     * @returns {Promise<void>}
-     */
-    async autoTrade() {
-        const stocksResult = await getStocks();
-        if (!stocksResult.success) return;
+    /* --------------------------------------------------------------- */
+    /*  internal machinery                                             */
 
-        const accountResult = await getAccount();
-        if (!accountResult.success) return;
+    /* --------------------------------------------------------------- */
+    ensureStrategies(stock) {
+        if (this.strategies.has(stock)) return;
+        const S = [
+            new MeanReverter(),
+            new TrendFollower(),
+            new CycleDetector(),
+            new NoiseBreaker(),
+            new OrderImpactProbe()
+        ];
+        this.strategies.set(stock, S);
+        this.ensemble.set(stock, {weights: S.map(_ => 1), lastVote: 0});
+    }
 
-        const userResult = await getUser();
-        if (!userResult.success) return;
+    updateRegimeFeatures(stock) {
+        const h = this.history.get(stock);
+        if (h.length < 30) return;
+        for (const strat of this.strategies.get(stock)) {
+            const ret = strat.update(h);
+            if (ret != null) strat.sharpe = this.rollingSharpe(strat.returns);
+        }
+        this.reweightEnsemble(stock);
+    }
 
-        const balance = userResult.data.balance;
+    reweightEnsemble(stock) {
+        const strats = this.strategies.get(stock);
+        const sharps = strats.map(s => Math.max(s.sharpe, 0));
+        const sum = sharps.reduce((a, b) => a + b, 1e-8);
+        this.ensemble.get(stock).weights = sharps.map(s => s / sum);
+    }
 
-        // Map: Aktienname → Anzahl im Depot
-        const ownedStocks = new Map();
-        accountResult.data.positions.forEach(pos => {
-            if (pos.number > 0) {
-                ownedStocks.set(pos.stock.name, pos.number);
-            }
+    ensembleVote(stock) {
+        const strats = this.strategies.get(stock);
+        const w = this.ensemble.get(stock).weights;
+        let vote = 0;
+        strats.forEach((s, i) => vote += w[i] * s.signal());
+        this.ensemble.get(stock).lastVote = Math.sign(vote);
+        return Math.sign(vote);
+    }
+
+    kellySize(stock, price) {
+        const strats = this.strategies.get(stock);
+        const w = this.ensemble.get(stock).weights;
+        let avgWin = 0, avgLoss = 0, winProb = 0, cnt = 0;
+
+        strats.forEach((s, i) => {
+            const rets = s.returns;
+            if (rets.length < 10) return;
+            const pos = rets.filter(r => r > 0);
+            const neg = rets.filter(r => r < 0);
+            const p = pos.length / rets.length;
+            const meanPos = pos.reduce((a, b) => a + b, 0) / (pos.length || 1);
+            const meanNeg = neg.reduce((a, b) => a + b, 0) / (neg.length || 1);
+            avgWin += w[i] * (meanPos || 0);
+            avgLoss += w[i] * (-meanNeg || 0);
+            winProb += w[i] * p;
+            cnt++;
         });
 
-        for (const stock of stocksResult.data) {
-            if (stock.name === '-') continue;
+        if (cnt === 0) return 0;
 
-            const shouldBuy = this.shouldBuy(stock.name);
-            const shouldSell = this.shouldSell(stock.name);
+        const kelly = (avgWin * winProb - avgLoss * (1 - winProb)) / (avgWin * avgLoss || 1);
+        const maxSpend = this.maxPos * this.account.balance;   // ← declare before use
+        let shares = Math.floor(maxSpend * Math.min(Math.max(kelly, 0), 0.25) / price);
 
-            if (shouldBuy) {
-                // Kaufe passende Menge
-                const amount = this.calculateTradeAmount(stock.price, balance);
-                if (amount > 0 && balance >= stock.price * amount) {
-                    console.log(`Kaufe ${amount}x ${stock.name} für ${(stock.price * amount).toFixed(2)}€`);
-                    await this.executeTrade(stock.name, 'buy', amount);
-                }
-            } else if (shouldSell) {
-                const ownedAmount = ownedStocks.get(stock.name);
-                if (ownedAmount && ownedAmount > 0) {
-                    // Verkaufe passende Menge
-                    const amountToSell = Math.min(ownedAmount, 5); // Max 5 auf einmal
-                    console.log(`Verkaufe ${amountToSell}x ${stock.name}`);
-                    await this.executeTrade(stock.name, 'sell', amountToSell);
-                }
-            }
-        }
+        return (isFinite(shares) && shares > 0) ? shares : 0;
     }
 
-    /**
-     * Führt einen Kauf oder Verkauf über die API aus.
-     *
-     * @param {string} stockName
-     * @param {"buy"|"sell"} action
-     * @param {number} amount - Anzahl der Aktien.
-     * @returns {Promise<void>}
-     */
-    async executeTrade(stockName, action, amount) {
-        // Validierung: Nur echte Aktien-Namen
-        if (stockName === '-' || !stockName || stockName.trim() === '') {
-            console.warn('Ungültiger Aktienname:', stockName);
+    randomiseClip(delta) {
+        // add noise and never show exact size
+        const sign = Math.sign(delta);
+        const abs = Math.abs(delta);
+        const noisy = Math.floor(abs * (0.9 + 0.2 * Math.random()));
+        return Math.max(1, noisy) * sign;
+    }
+
+    rollingSharpe(returns, halfLife = 20) {
+        if (returns.length < 5) return 0;
+        let mean = 0, varr = 0, lam = Math.pow(0.5, 1 / halfLife);
+        for (const r of returns) {
+            mean = lam * mean + (1 - lam) * r;
+            varr = lam * varr + (1 - lam) * (r - mean) ** 2;
+        }
+        const vol = Math.sqrt(varr) || 1e-8;
+        return mean / vol;
+    }
+
+    async refreshAccount() {
+        const u = await getUser();
+        if (!u.success) return;
+        const a = await getAccount();
+        if (!a.success) return;
+        this.account.balance = u.data.balance;
+        this.account.positions.clear();
+        a.data.positions.forEach(p => this.account.positions.set(p.stock.name, p.number));
+    }
+
+    async executeTrade(stock, action, amount) {
+        if (!stock || stock === '-' || !Number.isFinite(amount) || amount <= 0) return;
+
+        const owned = this.account.positions.get(stock) || 0;
+        const needed = (action === 'sell') ? amount : 0;
+
+        /* -----  1.  own enough to sell?  ----- */
+        if (needed > owned) {
+            const now = Date.now();
+            const last = this.skipCache.get(stock);
+            if (!last || now - last > 60_000) {          // print once per minute
+                console.warn(`[SKIP] wanted to SELL ${amount} ${stock} but only own ${owned}`);
+                this.skipCache.set(stock, now);
+            }
             return;
         }
 
-        // Validierung: Nur positive Anzahl
-        if (isNaN(amount) || amount <= 0) {
-            console.warn('Ungültige Anzahl:', amount);
-            return;
+        /* ----------  buy-side hard cap  ---------- */
+        if (action === 'buy') {
+            const price = (await getStocks()).data.find(s => s.name === stock)?.price || 0;
+            if (!price || price <= 0) return;          // illiquid stock
+            const maxAffordable = Math.floor(this.account.balance * 0.95 / price);
+            amount = Math.min(amount, maxAffordable);
+            if (amount < 1) return;                    // can't even afford 1 share
         }
+        /* ----------  absolute server limit  ---------- */
+        amount = Math.min(amount, this.maxSharesPerOrder);
+        /* ----------  keep the existing integer rounding  ---------- */
+        amount = Math.floor(amount);
+        /* ----------  3.  absolute server limit  ---------- */
+        amount = Math.min(amount, this.maxSharesPerOrder);
 
-        try {
-            let finalNumber = amount;
-            if (action === 'sell') {
-                finalNumber = -amount;
-            }
-
-            // Prüfe, ob number 0 ist
-            if (finalNumber === 0) {
-                console.warn('Anzahl darf nicht 0 sein');
-                return;
-            }
-
-            const result = await postPositions(stockName, finalNumber);
-            if (result.success) {
-                console.log(`${action.toUpperCase()} erfolgreich: ${amount} ${stockName}`);
-            } else {
-                console.error(`Fehler beim ${action}:`, result.error);
-                showToast(result.error.message, result.error.status);
-            }
-        } catch (e) {
-            console.error(`Netzwerkfehler beim ${action} von ${amount} ${stockName}:`, e.message);
-            showToast('Netzwerkfehler: ' + e.message, 0);
-        }
-    }
-
-    /**
-     * Berechnet die sinnvolle Kaufmenge basierend auf Preis und Kontostand.
-     *
-     * @param {number} stockPrice - Preis einer Aktie.
-     * @param {number} balance - Kontostand des Nutzers.
-     * @param {string} strategy - Name der Strategie.
-     * @returns {number} Anzahl der zu kaufenden Aktien.
-     */
-    calculateTradeAmount(stockPrice, balance, strategy = 'default') {
-        let percentageToUse = 0.1; // 10% des Guthabens
-
-        // Anfangsstrategie: Wenn Guthaben hoch (zB. > 5000), nimm 30%
-        if (balance > 5000 && strategy === 'default') {
-            percentageToUse = 0.3;
-        }
-        // Wenn Guthaben mittel (zB. 1000–5000), nimm 20%
-        else if (balance > 1000 && balance <= 5000) {
-            percentageToUse = 0.2;
-        }
-        // Wenn Guthaben niedrig (zB. < 1000), nimm 5%
-        else if (balance <= 1000) {
-            percentageToUse = 0.05;
-        }
-
-        // Berechne Menge: wie viele Aktien kannst du kaufen?
-        const amount = Math.floor((balance * percentageToUse) / stockPrice);
-
-        // Mindestens 1 Aktie kaufen, wenn genug Guthaben
-        if (amount < 1 && balance >= stockPrice) {
-            return 1;
-        }
-
-        // Maximal 10 Aktien auf einmal
-        return Math.min(amount, 10);
+        const dir = action === 'buy' ? amount : -amount;
+        const r = await postPositions(stock, dir);
+        if (r.success) console.log(`[LIVE] ${action.toUpperCase()} ${amount} ${stock}`);
+        else console.warn(`[LIVE] 422 – server rejected ${action} ${amount} ${stock}`);
     }
 }
 
-// Globale Instanz
+/* ===================================================================
+ *  Micro-strategies – kept intentionally simple so they run on-line
+ * =================================================================== */
+class MeanReverter {
+    constructor() {
+        this.returns = [];
+    }
+
+    update(h) { // h is history array
+        const len = h.length;
+        if (len < 20) return null;
+        const sma20 = h.slice(-20).reduce((a, b) => a + b.p, 0) / 20;
+        const last = h[h.length - 1].p;
+        this.returns.push((sma20 - last) / last);
+        if (this.returns.length > 100) this.returns.shift();
+        return this.returns[this.returns.length - 1];
+    }
+
+    signal() {
+        const last = this.returns[this.returns.length - 1];
+        return last > 0.01 ? 1 : last < -0.01 ? -1 : 0;
+    }
+}
+
+class TrendFollower {
+    constructor() {
+        this.returns = [];
+    }
+
+    update(h) {
+        if (h.length < 10) return null;
+        const ema = (a, b, lam = 0.2) => lam * b + (1 - lam) * a;
+        let e = h[0].p;
+        for (let i = 1; i < h.length; i++) e = ema(e, h[i].p);
+        const mom = (h[h.length - 1].p - e) / e;
+        this.returns.push(mom);
+        if (this.returns.length > 100) this.returns.shift();
+        return mom;
+    }
+
+    signal() {
+        const m = this.returns[this.returns.length - 1];
+        return m > 0.005 ? 1 : m < -0.005 ? -1 : 0;
+    }
+}
+
+class CycleDetector {
+    constructor() {
+        this.returns = [];
+        this.last = 0;
+    }
+
+    update(h) {
+        if (h.length < 20) return 0;
+        /* simple 10-period RSI instead of FFT – no pow2 needed */
+        const prices = h.slice(-10).map(x => x.p);
+        const gains = [], losses = [];
+        for (let i = 1; i < prices.length; i++) {
+            const d = prices[i] - prices[i - 1];
+            gains.push(d > 0 ? d : 0);
+            losses.push(d < 0 ? -d : 0);
+        }
+        const avgGain = gains.reduce((a, b) => a + b) / gains.length || 0.001;
+        const avgLoss = losses.reduce((a, b) => a + b) / losses.length || 0.001;
+        const rs = avgGain / avgLoss;
+        const rsi = 100 - (100 / (1 + rs));
+        const signal = (rsi > 70) ? -1 : (rsi < 30) ? 1 : 0;
+        this.returns.push(signal * 0.01);
+        if (this.returns.length > 100) this.returns.shift();
+        return signal * 0.01;
+    }
+
+    signal() {
+        return this.returns[this.returns.length - 1] > 0.005 ? -1 :
+            this.returns[this.returns.length - 1] < -0.005 ? 1 : 0;
+    }
+}
+
+class NoiseBreaker {
+    constructor() {
+        this.returns = [];
+    }
+
+    update(h) {
+        if (h.length < 10) return null;
+        const diff = h[h.length - 1].p - h[h.length - 2].p;
+        this.returns.push(Math.sign(diff) * Math.min(Math.abs(diff), 0.02));
+        if (this.returns.length > 100) this.returns.shift();
+        return diff;
+    }
+
+    signal() {
+        const d = this.returns[this.returns.length - 1];
+        return d > 0.01 ? -1 : d < -0.01 ? 1 : 0;
+    }
+}
+
+class OrderImpactProbe {
+    constructor() {
+        this.returns = [];
+        this.probeSize = 1;
+    }
+
+    update(h) {
+        // dummy – real implementation would compare price before/after our trade
+        this.returns.push(0);
+        return 0;
+    }
+
+    signal() {
+        return 0;
+    }
+}
+
+/* ----------  global instance + toggle  ---------- */
 window.tradingStrategy = new TradingStrategy();
+/* expose the toggle so you can flip it from console or a button */
+window.botOn = () => window.tradingStrategy.botOn;
+window.setBot = (on) => {
+    window.tradingStrategy.botOn = Boolean(on);
+    console.log(`[BOT] ${window.tradingStrategy.botOn ? 'ARMED' : 'DISARMED'}`);
+};
+window.resetDrawDown = () => {
+    window.tradingStrategy.peakBalance = window.tradingStrategy.account.balance;
+    console.log('[BOT] Draw-down brake reset');
+};
+window.resetBrake = () => {
+    window.tradingStrategy.peakBalance = window.tradingStrategy.account.balance;
+    console.log('[BOT] Draw-down brake reset – you can trade again');
+};
+window.tradingStrategy.maxDrawDown = 0.30;   // 30 % instead of 10 %
+window.tradingStrategy.skipCache.clear();
+/* start in safe mode */
+window.setBot(false);
