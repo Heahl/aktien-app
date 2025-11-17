@@ -1,12 +1,24 @@
 // trading-strategy.js
+/**
+ * KI-basierte Trading-Strategie für automatische Kauf- und Verkaufsentscheidungen.
+ * Speichert Kursverläufe, schätzt Preisparameter und führt Trades über die API aus.
+ */
 class TradingStrategy {
+    /**
+     * Initialisiert Maps für Historie, geschätzte Parameter und letzte Schritte.
+     */
     constructor() {
         this.history = new Map(); // { stockName: [{ timestamp, price, step }] }
         this.params = new Map();  // { stockName: { coreValue, amplitude, phase, phaselength } }
         this.lastSteps = new Map(); // { stockName: lastKnownStep }
     }
 
-    // Speichere neuen Kurs + berechne Parameter
+    /**
+     * Fügt einen neuen Preis in die Historie ein und schätzt die Parameter neu.
+     *
+     * @param {string} stockName - Name der Aktie.
+     * @param {number} price - Aktueller Preis.
+     */
     async updateHistory(stockName, price) {
         const now = Date.now();
         const step = Math.floor(now / 500); // Näherung an serverseitiges "steps"
@@ -27,7 +39,12 @@ class TradingStrategy {
         this.estimateParams(stockName);
     }
 
-    // Schätze Parameter aus Historie
+    /**
+     * Schätzt Mittelwert, Amplitude, Phase und Periodenlänge
+     * aus der bisherigen Preishistorie.
+     *
+     * @param {string} stockName - Name der Aktie.
+     */
     estimateParams(stockName) {
         const history = this.history.get(stockName);
         if (!history || history.length < 10) return;
@@ -64,7 +81,12 @@ class TradingStrategy {
         this.params.set(stockName, {coreValue, amplitude, phase, phaselength});
     }
 
-    // Finde Peaks (lokale Maxima)
+    /**
+     * Findet lokale Maxima (Peaks) im Kursverlauf einer Aktie.
+     *
+     * @param {{timestamp:number, price:number, step:number}[]} history
+     * @returns {Object[]} Liste der Peak-Objekte.
+     */
     findPeaks(history) {
         const peaks = [];
         for (let i = 1; i < history.length - 1; i++) {
@@ -75,7 +97,13 @@ class TradingStrategy {
         return peaks;
     }
 
-    // Prognostiziere nächsten Preis
+    /**
+     * Prognostiziert einen zukünftigen Preis anhand der geschätzten Parameter.
+     *
+     * @param {string} stockName - Aktie.
+     * @param {number} futureStep - Zeitindex in der Zukunft.
+     * @returns {number|null} Geschätzter Preis oder null.
+     */
     predictNextPrice(stockName, futureStep) {
         const params = this.params.get(stockName);
         if (!params) return null;
@@ -84,7 +112,13 @@ class TradingStrategy {
         return Math.round(100 * Math.sin((futureStep + phase) / phaselength) * amplitude + coreValue) / 100;
     }
 
-    // Soll gekauft werden?
+    /**
+     * Entscheidet, ob eine Aktie gekauft werden soll.
+     *
+     * @param {string} stockName
+     * @param {number} lookAheadSteps - Wie weit in die Zukunft geschaut wird.
+     * @returns {boolean} true = kaufen.
+     */
     shouldBuy(stockName, lookAheadSteps = 5) {
         const currentStep = Math.floor(Date.now() / 500);
         const currentPrice = this.getCurrentPrice(stockName);
@@ -96,7 +130,13 @@ class TradingStrategy {
         return predictedPrice > currentPrice * 1.01; // Kaufe, wenn 1% höher
     }
 
-    // Soll verkauft werden?
+    /**
+     * Entscheidet, ob eine Aktie verkauft werden soll.
+     *
+     * @param {string} stockName
+     * @param {number} lookAheadSteps
+     * @returns {boolean} true = verkaufen.
+     */
     shouldSell(stockName, lookAheadSteps = 5) {
         const currentStep = Math.floor(Date.now() / 500);
         const currentPrice = this.getCurrentPrice(stockName);
@@ -108,14 +148,23 @@ class TradingStrategy {
         return predictedPrice < currentPrice * 0.99; // Verkaufe, wenn 1% niedriger
     }
 
-    // Aktueller Preis
+    /**
+     * Liefert den aktuellsten gespeicherten Preis einer Aktie.
+     *
+     * @param {string} stockName
+     * @returns {number|null}
+     */
     getCurrentPrice(stockName) {
         const history = this.history.get(stockName);
         if (!history || history.length === 0) return null;
         return history[history.length - 1].price;
     }
 
-    // Hole alle Aktien und aktualisiere Historie
+    /**
+     * Holt alle verfügbaren Aktienpreise und aktualisiert ihre Historien.
+     *
+     * @returns {Promise<void>}
+     */
     async updateAllStocks() {
         const result = await getStocks();
         if (!result.success) return;
@@ -125,7 +174,12 @@ class TradingStrategy {
         }
     }
 
-// Automatischer Handel
+    /**
+     * Führt automatischen Handel durch:
+     * Prüft Kauf-/Verkaufssignale und führt passende Trades aus.
+     *
+     * @returns {Promise<void>}
+     */
     async autoTrade() {
         const stocksResult = await getStocks();
         if (!stocksResult.success) return;
@@ -171,7 +225,14 @@ class TradingStrategy {
         }
     }
 
-// Führe Handel aus
+    /**
+     * Führt einen Kauf oder Verkauf über die API aus.
+     *
+     * @param {string} stockName
+     * @param {"buy"|"sell"} action
+     * @param {number} amount - Anzahl der Aktien.
+     * @returns {Promise<void>}
+     */
     async executeTrade(stockName, action, amount) {
         // Validierung: Nur echte Aktien-Namen
         if (stockName === '-' || !stockName || stockName.trim() === '') {
@@ -210,7 +271,14 @@ class TradingStrategy {
         }
     }
 
-    // Berechne passende Kauf-/Verkaufsmenge
+    /**
+     * Berechnet die sinnvolle Kaufmenge basierend auf Preis und Kontostand.
+     *
+     * @param {number} stockPrice - Preis einer Aktie.
+     * @param {number} balance - Kontostand des Nutzers.
+     * @param {string} strategy - Name der Strategie.
+     * @returns {number} Anzahl der zu kaufenden Aktien.
+     */
     calculateTradeAmount(stockPrice, balance, strategy = 'default') {
         let percentageToUse = 0.1; // 10% des Guthabens
 

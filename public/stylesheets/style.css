@@ -108,20 +108,36 @@ nav {
     grid-area: portfolio;
 }
 
+/*main {*/
+/*    min-height: 100%;*/
+/*    width: 100%;*/
+/*    display: grid;*/
+/*    gap: .5rem;*/
+/*    margin-top: 3rem;*/
+/*    padding: 1rem;*/
+/*    overflow-x: hidden;*/
+/*    grid-template-areas:*/
+/*            "chart chart stocks depot"*/
+/*            "send send portfolio news"*/
+/*            "messages messages messages news"*/
+/*            "ranking ranking ranking news";*/
+/*}*/
+
 main {
-    min-height: 100%;
-    width: 100%;
     display: grid;
-    gap: .5rem;
-    margin-top: 3rem;
+    gap: 1rem;
     padding: 1rem;
-    overflow-x: hidden;
+    margin-top: 4rem;
+
+    grid-template-columns: 2fr 2fr 1.2fr 1.2fr;
+
     grid-template-areas:
-            "chart chart stocks depot"
-            "send send portfolio news"
-            "messages messages messages news"
-"ranking ranking ranking news";
+        "chart chart stocks depot"
+        "send send portfolio ranking"
+        "messages messages messages news"
+        ". . . fehlerMeldung";
 }
+
 
 section {
     background-color: var(--neutral-50);
@@ -131,7 +147,7 @@ section {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    max-height: 30rem;
+    /*max-height: 30rem;*/
 }
 
 h1, h2 {
@@ -277,23 +293,44 @@ h1, h2 {
 /* ende aktienübersicht */
 
 /* rangliste */
+/*#ranking-list-container {*/
+/*    grid-area: ranking;*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*    justify-content: space-between;*/
+/*    align-items: center;*/
+/*    padding: 1rem;*/
+/*    gap: 2rem;*/
+/*}*/
+
+
+/* TEST */
+
 #ranking-list-container {
     grid-area: ranking;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .5rem;
     padding: 1rem;
-    gap: 2rem;
 }
 
-.ranking-item {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    height: 2rem;
+/*.ranking-item {*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    gap: 1rem;*/
+/*    height: 2rem;*/
+/*    width: 100%;*/
+/*}*/
+
+.ranking-item{
+    display: grid;
+    grid-template-columns: 2rem 1fr auto;
+    gap: 0.5rem;
     width: 100%;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid var(--neutral-300);
 }
 
 .rank-column {
@@ -548,3 +585,74 @@ h1, h2 {
         min-width: auto;
     }
 }
+
+
+/* TEST */
+
+@media (max-width: 768px) {
+
+
+    main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 3.5rem;
+        /*grid-template-columns: 1fr;*/
+        /*grid-template-areas:*/
+        /*    "chart"*/
+        /*    "stocks"*/
+        /*    "portfolio"*/
+        /*    "depot"*/
+        /*    "messages"*/
+        /*    "send"*/
+        /*    "ranking"*/
+        /*    "news";*/
+    }
+
+    section {
+        max-height: none;
+        width: 100%;
+    }
+
+    /* Reihenfolge, kannst ändern, faös willst */
+
+    /*#stock-container { order: 1; }*/
+    /*#depot { order: 2; }*/
+    /*#portfolio-container { order: 3; }*/
+    /*#stock-container { order: 4; }*/
+    /*#message-container { order: 5; }*/
+    /*#message-sender { order: 6; }*/
+    /*#ranking-list-container { order: 7; }*/
+    /*#news-container { order: 8; }*/
+
+    nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        text-align: center;
+    }
+
+    .ranking-item,
+    .stocks-info,
+    .message-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}
+
+/* TEST */
+
+/*@media (max-width: 480px) {*/
+/*    h1, h2 {*/
+/*        font-size: 1rem;*/
+/*    }*/
+
+/*    button {*/
+/*        font-size: 0.9rem;*/
+/*    }*/
+
+/*    input, select, textarea {*/
+/*        font-size: 1rem;*/
+/*    }*/
+/*}*/
