@@ -80,9 +80,11 @@ nav {
     justify-content: space-between;
     background-color: var(--neutral-900);
     color: var(--neutral-100);
-    padding: 1rem 1rem;
-    position: absolute;
+    padding: 1rem;
+    position: fixed;
     top: 0;
+    left: 0;
+    z-index: 100;
 }
 
 .navigation-container {
@@ -123,19 +125,64 @@ nav {
 /*            "ranking ranking ranking news";*/
 /*}*/
 
+
+/* Version 2 ist schon besser, aber nicht vollkomen ! */
+/*main {*/
+/*    display: grid;*/
+/*    gap: 1rem;*/
+/*    padding: 1rem;*/
+/*    margin-top: 4.5rem;*/
+
+/*    !*grid-template-columns: 2fr 2fr 1.2fr 1.2fr;*!*/
+/*    grid-template-columns: 3fr 1.8fr 1.2fr 1.2fr;*/
+
+/*    grid-template-areas:*/
+/*        "chart chart stocks depot"*/
+/*        "send send portfolio ranking"*/
+/*        "messages messages messages news"*/
+/*        ". . . fehlerMeldung";*/
+/*}*/
+
 main {
     display: grid;
     gap: 1rem;
     padding: 1rem;
-    margin-top: 4rem;
+    margin-top: 4.5rem;
 
-    grid-template-columns: 2fr 2fr 1.2fr 1.2fr;
+    /*grid-template-columns: 2fr 2fr 1.2fr 1.2fr;*/
+    grid-template-columns: 2fr 2fr 1.4fr 1.4fr;
 
     grid-template-areas:
-        "chart chart stocks depot"
-        "send send portfolio ranking"
-        "messages messages messages news"
-        ". . . fehlerMeldung";
+        "chart chart stocks tradingBlock"
+        "send send portfolio news"
+        "messages messages messages fehlerMeldung";
+}
+
+#tradingBlock {
+    grid-area: tradingBlock;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ranking-title{
+    font-size: 1.2rem;
+    color: var(--neutral-800);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+#fehlerMeldung {
+    grid-area: fehlerMeldung;
+    background: var(--secondary-50);
+    border-left: 4px solid var(--secondary-800);
+    min-height: 4rem;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--neutral-800);
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
 }
 
 
@@ -172,12 +219,15 @@ h1, h2 {
 /* chart */
 #stock-container {
     grid-area: chart;
-    padding: .8rem;
+    /*padding: .8rem;*/
     grid-column: 1/3;
     background-color: rgba(255, 255, 255, 30%);
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    /*justify-content: flex-end;*/
+    justify-content: flex-start;
+    padding-top: 1.5rem;
+    min-height: 18rem;
 }
 
 .stock-chart {
@@ -247,7 +297,7 @@ h1, h2 {
     color: white;
     border-radius: .2rem;
     border: none;
-    min-width: 3rem;
+    min-width: 4rem;
 }
 
 .quick-select-btn:hover {
@@ -597,62 +647,25 @@ h1, h2 {
         flex-direction: column;
         gap: 0.75rem;
         margin-top: 3.5rem;
-        /*grid-template-columns: 1fr;*/
-        /*grid-template-areas:*/
-        /*    "chart"*/
-        /*    "stocks"*/
-        /*    "portfolio"*/
-        /*    "depot"*/
-        /*    "messages"*/
-        /*    "send"*/
-        /*    "ranking"*/
-        /*    "news";*/
-    }
 
-    section {
-        max-height: none;
-        width: 100%;
-    }
+        section {
+            max-height: none;
+            width: 100%;
+        }
 
-    /* Reihenfolge, kannst ändern, faös willst */
+        nav {
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            text-align: center;
+        }
 
-    /*#stock-container { order: 1; }*/
-    /*#depot { order: 2; }*/
-    /*#portfolio-container { order: 3; }*/
-    /*#stock-container { order: 4; }*/
-    /*#message-container { order: 5; }*/
-    /*#message-sender { order: 6; }*/
-    /*#ranking-list-container { order: 7; }*/
-    /*#news-container { order: 8; }*/
-
-    nav {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.25rem;
-        text-align: center;
-    }
-
-    .ranking-item,
-    .stocks-info,
-    .message-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
+        .ranking-item,
+        .stocks-info,
+        .message-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
     }
 }
-
-/* TEST */
-
-/*@media (max-width: 480px) {*/
-/*    h1, h2 {*/
-/*        font-size: 1rem;*/
-/*    }*/
-
-/*    button {*/
-/*        font-size: 0.9rem;*/
-/*    }*/
-
-/*    input, select, textarea {*/
-/*        font-size: 1rem;*/
-/*    }*/
-/*}*/
