@@ -62,12 +62,7 @@ async function init() {
         document.getElementById('sell-tab').classList.add('active');
         document.getElementById('buy-tab').classList.remove('active');
     });
-    quickSelectBtns.forEach(button => {
-        button.addEventListener('click', () => {
-            const amount = button.dataset.amount;
-            setAmount(parseInt(amount));
-        });
-    });
+    // ALTE quickSelectBtns Logik entfernt
     reviewOrderBtn.addEventListener('click', async () => {
         // // console.log('Review Order Button geklickt');
 
@@ -143,6 +138,88 @@ async function init() {
             amountInput.value = amount;
         }
     }
+
+    // === Kauf/Verkauf-Buttons ohne "Prüfen" ===
+
+    // NEU: Event-Listener für Kauf-Buttons
+    const buyButtons = document.querySelectorAll('.quick-select-btn-buy');
+    buyButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const amount = parseInt(button.dataset.amount);
+            const assetName = document.getElementById('asset-selector').value;
+
+            if (!assetName || amount <= 0) {
+                alert('Bitte wählen Sie eine Aktie und eine gültige Anzahl aus.');
+                return;
+            }
+
+            // Kauf-Transaktion durchführen
+            executeTrade(assetName, amount, true); // isBuy = true
+        });
+    });
+
+    // Event-Listener für Verkauf-Buttons
+    const sellButtons = document.querySelectorAll('.quick-select-btn-sell');
+    sellButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const amount = parseInt(button.dataset.amount);
+            const assetName = document.getElementById('asset-selector').value;
+
+            if (!assetName || amount <= 0) {
+                alert('Bitte wählen Sie eine Aktie und eine gültige Anzahl aus.');
+                return;
+            }
+
+            // Verkauf-Transaktion durchführen (negative Anzahl)
+            executeTrade(assetName, amount, false); // isBuy = false
+        });
+    });
+
+    // Funktion: Führe Kauf/Verkauf direkt aus
+    async function executeTrade(assetName, amount, isBuy) {
+        let result;
+        if (isBuy) {
+            console.log('Kaufe Aktien:', assetName, 'Anzahl:', amount);
+            result = await postPositions(assetName, amount);
+        } else {
+            console.log('Verkaufe Aktien:', assetName, 'Anzahl:', amount);
+            result = await postPositions(assetName, -amount); // Negative Anzahl für Verkauf
+        }
+
+        if (result.success) {
+            console.log('Transaktion erfolgreich:', result.data);
+            showToast('Transaktion erfolgreich!', 201, 'success');
+        } else {
+            console.log('Transaktion fehlgeschlagen:', result.error);
+            showToast(result.error.message, result.error.status);
+        }
+
+        // vlt wollen wir den selector zurücksetzen. mal schauen..
+        //document.getElementById('asset-selector').value = 'default';
+
+        // === SOFORT AKTUALISIEREN NACH TRANSAKTION ===
+        console.log('Aktualisiere Depot und Nutzerdaten...');
+        const accountResult = await getAccount();
+        if (accountResult.success) {
+            console.log('Neue Depot-Daten:', accountResult.data);
+            displayDepot(accountResult.data);
+        } else {
+            console.log('Fehler beim Aktualisieren des Depots:', accountResult.error);
+            showToast(accountResult.error.message, accountResult.error.status);
+        }
+
+        const userResult = await getUser();
+        if (userResult.success) {
+            displayUser(userResult.data);
+        } else {
+            showToast(userResult.error.message, userResult.error.status);
+        }
+
+        // Chart aktualisieren
+        await renderCharts();
+        console.log('Depot, Nutzerdaten und Chart aktualisiert');
+    }
+
 
     const newsResult = await getNews();
     if (newsResult.success) {

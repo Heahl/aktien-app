@@ -59,17 +59,32 @@
                 <label for="amount">Anzahl Aktien</label>
                 <input type="number" id="amount" placeholder="0" step="1" min="1">
             </div>
-            <div class="quick-select">
-                <button class="quick-select-btn" data-amount="1">1</button>
-                <button class="quick-select-btn" data-amount="5">5</button>
-                <button class="quick-select-btn" data-amount="10">10</button>
-                <button class="quick-select-btn" data-amount="50">50</button>
-            </div>
             <div class="trading-field">
                 <label for="asset-selector">Aktie:</label>
                 <select name="asset-selector" id="asset-selector"></select>
             </div>
             <button id="review-order" class="review-button">Bestellung prüfen</button>
+            <!-- Kauf-Buttons -->
+            <div class="trading-field">
+                <h3>Direkt Kaufen</h3>
+                <div class="quick-select">
+                    <button class="quick-select-btn-buy" data-amount="10">10</button>
+                    <button class="quick-select-btn-buy" data-amount="50">50</button>
+                    <button class="quick-select-btn-buy" data-amount="100">100</button>
+                    <button class="quick-select-btn-buy" data-amount="500">500</button>
+                </div>
+            </div>
+
+            <!-- Verkauf-Buttons -->
+            <div class="trading-field">
+                <h3>Direkt Verkaufen</h3>
+                <div class="quick-select">
+                    <button class="quick-select-btn-sell" data-amount="10">10</button>
+                    <button class="quick-select-btn-sell" data-amount="50">50</button>
+                    <button class="quick-select-btn-sell" data-amount="100">100</button>
+                    <button class="quick-select-btn-sell" data-amount="500">500</button>
+                </div>
+            </div>
         </section>
 
         <!-- Rangliste aller Spieler -->
