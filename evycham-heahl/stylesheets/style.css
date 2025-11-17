@@ -1,6 +1,6 @@
 @font-face {
     font-face-name: Figtree;
-    src: url("public/fonts/Figtree-VariableFont_wght.ttf");
+    src: url("../fonts/Figtree-VariableFont_wght.ttf");
 }
 
 * {
@@ -352,7 +352,7 @@ h1, h2 {
 /*    width: 100%;*/
 /*}*/
 
-.ranking-item{
+.ranking-item {
     display: grid;
     grid-template-columns: 2rem 1fr auto;
     gap: 0.5rem;
