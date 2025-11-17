@@ -33,21 +33,20 @@
     <section id="stock-container">
         <canvas class="stock-chart" height="100" width="200"></canvas>
     </section>
-    <!-- Portfolio des Spielers -->
-    <section id="portfolio-container">
-        <template id="portfolio-template">
-            <div class="portfolio-item">
-                <span class="portfolio-name"></span>
-                <span class="portfolio-value"></span>
+
+    <!-- Übersichtliche Liste aller Aktienkurse -->
+    <section id="stocks-container">
+        <template id="stocks-template">
+            <div class="stocks-info">
+                <span class="stocks-name"></span>
+                <span class="stocks-price"></span>
+                <span class="stocks-available"></span>
             </div>
         </template>
     </section>
 
-
-
-
     <!--  TEST -->
-
+    <div id="tradingBlock">
         <!-- Kaufen/Verkaufen -->
         <section id="depot">
             <div id="trading-container">
@@ -74,10 +73,10 @@
             <button id="review-order" class="review-button">Bestellung prüfen</button>
         </section>
 
-    <!-- Rangliste aller Spieler -->
-    <div id="tradingBlock">
+        <!-- Rangliste aller Spieler -->
+
         <section id="ranking-list-container">
-            <h2 class="ranking-title"></h2>
+            <h2 class="ranking-title">Top Spieler</h2>
             <template id="ranking-item-template">
                 <div class="ranking-item">
                     <span class="rank-column"></span>
@@ -88,6 +87,91 @@
         </section>
 
     </div>
+
+    <!-- Nachrichten senden -->
+    <section id="message-sender">
+        <div class="message-field">
+            <label for="message-text">Nachricht:</label>
+            <textarea id="message-text" placeholder="Nachricht eingeben..."></textarea>
+        </div>
+        <div class="message-field">
+            <label>Empfänger:</label>
+            <div id="recipient-selector-container" class="recipient-selector-container">
+            </div>
+        </div>
+
+        <button id="send-message" class="send-button">Nachricht senden</button>
+    </section>
+
+    <!-- Portfolio des Spielers -->
+    <section id="portfolio-container">
+        <template id="portfolio-template">
+            <div class="portfolio-item">
+                <span class="portfolio-name"></span>
+                <span class="portfolio-value"></span>
+            </div>
+        </template>
+    </section>
+
+    <section id="news-container">
+        <div class="news-controls">
+            <button id="newsLastHour">Stunde</button>
+            <button id="newsLastDay">Tag</button>
+            <button id="newsLastTwenty">Alle</button>
+        </div>
+        <template id="news-template">
+            <div class="news-item">
+                <span class="news-time"></span>
+                <span class="news-text"></span>
+            </div>
+        </template>
+    </section>
+
+
+
+
+<!--    &lt;!&ndash;  TEST &ndash;&gt;-->
+<!--    <div id="tradingBlock">-->
+<!--        &lt;!&ndash; Kaufen/Verkaufen &ndash;&gt;-->
+<!--        <section id="depot">-->
+<!--            <div id="trading-container">-->
+<!--                <h2>Handeln</h2>-->
+<!--                <div class="trading-tabs">-->
+<!--                    <button id="buy-tab" class="trade-tab active">Kaufen</button>-->
+<!--                    <button id="sell-tab" class="trade-tab">Verkaufen</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="trading-field">-->
+<!--                <label for="amount">Anzahl Aktien</label>-->
+<!--                <input type="number" id="amount" placeholder="0" step="1" min="1">-->
+<!--            </div>-->
+<!--            <div class="quick-select">-->
+<!--                <button class="quick-select-btn" data-amount="1">1</button>-->
+<!--                <button class="quick-select-btn" data-amount="5">5</button>-->
+<!--                <button class="quick-select-btn" data-amount="10">10</button>-->
+<!--                <button class="quick-select-btn" data-amount="50">50</button>-->
+<!--            </div>-->
+<!--            <div class="trading-field">-->
+<!--                <label for="asset-selector">Aktie:</label>-->
+<!--                <select name="asset-selector" id="asset-selector"></select>-->
+<!--            </div>-->
+<!--            <button id="review-order" class="review-button">Bestellung prüfen</button>-->
+<!--        </section>-->
+
+<!--    &lt;!&ndash; Rangliste aller Spieler &ndash;&gt;-->
+
+<!--        <section id="ranking-list-container">-->
+<!--            <h2 class="ranking-title"></h2>-->
+<!--            <template id="ranking-item-template">-->
+<!--                <div class="ranking-item">-->
+<!--                    <span class="rank-column"></span>-->
+<!--                    <span class="player-column"></span>-->
+<!--                    <span class="value-column"></span>-->
+<!--                </div>-->
+<!--            </template>-->
+<!--        </section>-->
+
+<!--    </div>-->
 
     <!-- TEST  -->
 <!--    &lt;!&ndash; Kaufen/Verkaufen &ndash;&gt;-->
@@ -130,30 +214,30 @@
             </div>
         </template>
     </section>
-    <!-- Übersichtliche Liste aller Aktienkurse -->
-    <section id="stocks-container">
-        <template id="stocks-template">
-            <div class="stocks-info">
-                <span class="stocks-name"></span>
-                <span class="stocks-price"></span>
-                <span class="stocks-available"></span>
-            </div>
-        </template>
-    </section>
+<!--    &lt;!&ndash; Übersichtliche Liste aller Aktienkurse &ndash;&gt;-->
+<!--    <section id="stocks-container">-->
+<!--        <template id="stocks-template">-->
+<!--            <div class="stocks-info">-->
+<!--                <span class="stocks-name"></span>-->
+<!--                <span class="stocks-price"></span>-->
+<!--                <span class="stocks-available"></span>-->
+<!--            </div>-->
+<!--        </template>-->
+<!--    </section>-->
     <!-- News -->
-    <section id="news-container">
-        <div class="news-controls">
-            <button id="newsLastHour">Stunde</button>
-            <button id="newsLastDay">Tag</button>
-            <button id="newsLastTwenty">Alle</button>
-        </div>
-        <template id="news-template">
-            <div class="news-item">
-                <span class="news-time"></span>
-                <span class="news-text"></span>
-            </div>
-        </template>
-    </section>
+<!--    <section id="news-container">-->
+<!--        <div class="news-controls">-->
+<!--            <button id="newsLastHour">Stunde</button>-->
+<!--            <button id="newsLastDay">Tag</button>-->
+<!--            <button id="newsLastTwenty">Alle</button>-->
+<!--        </div>-->
+<!--        <template id="news-template">-->
+<!--            <div class="news-item">-->
+<!--                <span class="news-time"></span>-->
+<!--                <span class="news-text"></span>-->
+<!--            </div>-->
+<!--        </template>-->
+<!--    </section>-->
 
     <!--   TEST   -->
 <!--    &lt;!&ndash; Rangliste aller Spieler &ndash;&gt;-->
@@ -167,24 +251,25 @@
 <!--        </template>-->
 <!--    </section>-->
 
-    <!-- Nachrichten senden -->
-    <section id="message-sender">
-        <div class="message-field">
-            <label for="message-text">Nachricht:</label>
-            <textarea id="message-text" placeholder="Nachricht eingeben..."></textarea>
-        </div>
-        <div class="message-field">
-            <label>Empfänger:</label>
-            <div id="recipient-selector-container" class="recipient-selector-container">
-            </div>
-        </div>
+<!--    &lt;!&ndash; Nachrichten senden &ndash;&gt;-->
+<!--    <section id="message-sender">-->
+<!--        <div class="message-field">-->
+<!--            <label for="message-text">Nachricht:</label>-->
+<!--            <textarea id="message-text" placeholder="Nachricht eingeben..."></textarea>-->
+<!--        </div>-->
+<!--        <div class="message-field">-->
+<!--            <label>Empfänger:</label>-->
+<!--            <div id="recipient-selector-container" class="recipient-selector-container">-->
+<!--            </div>-->
+<!--        </div>-->
 
-        <button id="send-message" class="send-button">Nachricht senden</button>
-    </section>
+<!--        <button id="send-message" class="send-button">Nachricht senden</button>-->
+<!--    </section>-->
     <!-- Toast (wird bei Fehlermeldungen eingeblendet -->
     <div id="toast-container">
         <template id="toast-template">
             <div class="toast toast-error">
+                <h2 id="toast-titel"></h2>
                 <div class="toast-header">
                     <span class="toast-status"></span>
                     <button class="toast-close">x</button>
