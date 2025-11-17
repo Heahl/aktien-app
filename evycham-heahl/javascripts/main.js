@@ -412,7 +412,7 @@ async function renderCharts() {
     // neues chart erstellen
     window.currentChart = new Chart(ctx, {
         type: 'line',
-        chartData,
+        data: chartData,
         options: {
             responsive: true,
             animation: null,
