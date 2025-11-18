@@ -64,12 +64,7 @@ html {
 body {
     margin: 0;
     padding: 0;
-    max-width: 100vw;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     background-color: var(--neutral-100);
 }
 
@@ -110,58 +105,17 @@ nav {
     grid-area: portfolio;
 }
 
-/*main {*/
-/*    min-height: 100%;*/
-/*    width: 100%;*/
-/*    display: grid;*/
-/*    gap: .5rem;*/
-/*    margin-top: 3rem;*/
-/*    padding: 1rem;*/
-/*    overflow-x: hidden;*/
-/*    grid-template-areas:*/
-/*            "chart chart stocks depot"*/
-/*            "send send portfolio news"*/
-/*            "messages messages messages news"*/
-/*            "ranking ranking ranking news";*/
-/*}*/
-
-
-/* Version 2 ist schon besser, aber nicht vollkomen ! */
-/*main {*/
-/*    display: grid;*/
-/*    gap: 1rem;*/
-/*    padding: 1rem;*/
-/*    margin-top: 4.5rem;*/
-
-/*    !*grid-template-columns: 2fr 2fr 1.2fr 1.2fr;*!*/
-/*    grid-template-columns: 3fr 1.8fr 1.2fr 1.2fr;*/
-
-/*    grid-template-areas:*/
-/*        "chart chart stocks depot"*/
-/*        "send send portfolio ranking"*/
-/*        "messages messages messages news"*/
-/*        ". . . fehlerMeldung";*/
-/*}*/
-
 main {
     display: grid;
     gap: 1rem;
     padding: 1rem;
     margin-top: 5rem;
-
-    grid-template-columns: 1.4fr 2fr 1.8fr 1.2fr;
-
+    grid-template-columns: 2fr 0.9fr 1.4fr 1.1fr;
     grid-template-areas:
-        "chart chart stocks tradingBlock"
-        "send send portfolio news"
-        "messages messages messages fehlerMeldung";
-}
-
-#tradingBlock {
-    grid-area: tradingBlock;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+        "chart chart stocks depot"
+        ". . . ."
+        "send messages portfolio ranking"
+        "send messages portfolio ranking";
 }
 
 section {
@@ -172,18 +126,12 @@ section {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    /*max-height: 30rem;*/
 }
 
 h1, h2 {
     color: var(--neutral-900);
     font-size: 1.25rem;
     margin-bottom: .5rem;
-}
-
-/* portfolio */
-#stocks-container {
-    grid-area: stocks;
 }
 
 #stocks-template {
@@ -197,28 +145,28 @@ h1, h2 {
 /* chart */
 #stock-container {
     grid-area: chart;
-    /*padding: .8rem;*/
-    grid-column: 1/3;
     background-color: rgba(255, 255, 255, 30%);
-    display: flex;
+    /*display: flex;*/
+    display: block;
     align-items: center;
-    /*justify-content: flex-end;*/
     justify-content: flex-start;
-    padding-top: 1.5rem;
-    min-height: 18rem;
+    padding: 1.5rem;
+    height: 100%;
 }
 
 .stock-chart {
     width: 100%;
-    height: auto;
+    height: 100%;
 }
 
 /* Trading bereich */
-#depot {
+.depot {
     grid-area: depot;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    gap: 1rem;
+    align-items: stretch;
 }
 
 #trading-container {
@@ -303,6 +251,7 @@ h1, h2 {
 #stocks-container {
     grid-area: stocks;
     overflow-y: auto;
+    align-self: stretch;
 }
 
 #stocks-template {
@@ -320,20 +269,6 @@ h1, h2 {
 
 /* ende aktienübersicht */
 
-/* rangliste */
-/*#ranking-list-container {*/
-/*    grid-area: ranking;*/
-/*    display: flex;*/
-/*    flex-direction: row;*/
-/*    justify-content: space-between;*/
-/*    align-items: center;*/
-/*    padding: 1rem;*/
-/*    gap: 2rem;*/
-/*}*/
-
-
-/* TEST */
-
 #ranking-list-container {
     grid-area: ranking;
     display: flex;
@@ -342,15 +277,6 @@ h1, h2 {
     gap: .5rem;
     padding: 1rem;
 }
-
-/*.ranking-item {*/
-/*    display: flex;*/
-/*    justify-content: center;*/
-/*    align-items: center;*/
-/*    gap: 1rem;*/
-/*    height: 2rem;*/
-/*    width: 100%;*/
-/*}*/
 
 .ranking-item {
     display: grid;
@@ -361,60 +287,18 @@ h1, h2 {
     border-bottom: 1px solid var(--neutral-300);
 }
 
-/*.ranking-title{*/
-/*    font-size: 1.2rem;*/
-/*    color: var(--neutral-800);*/
-/*    margin-bottom: 0.5rem;*/
-/*    font-weight: 600;*/
-/*}*/
+.ranking-title{
+    font-size: 1.2rem;
+    color: var(--neutral-800);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
 
 .rank-column {
     font-size: 1.5rem;
 }
 
 /* Ende Ranking */
-
-/* Neuigkeiten */
-#news-container {
-    overflow-y: auto;
-    padding: 0;
-    grid-area: news;
-    max-height: 60rem;
-}
-
-.news-controls {
-    width: 100%;
-    height: auto;
-    display: flex;
-    justify-content: space-between;
-    gap: .5rem;
-    position: sticky;
-    top: 0;
-    background-color: var(--neutral-50);
-    padding: 1rem;
-    z-index: 20;
-}
-
-.news-controls button {
-    font-size: .8rem;
-    flex: 1;
-    padding: var(--btn-padding);
-    background-color: var(--neutral-500);
-    color: white;
-    border-radius: .2rem;
-    border: none;
-    min-width: 3rem;
-}
-
-.news-item {
-    margin: 0 1rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: .5rem;
-    font-size: .8rem;
-}
-
-/* Ende Neuigkeiten */
 
 /* Nachrichten */
 
@@ -423,6 +307,8 @@ h1, h2 {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    max-height: 28rem;
+    padding: 0.5rem;
 }
 
 .message-item {
@@ -470,7 +356,6 @@ h1, h2 {
     flex-direction: column;
     gap: 0.5rem;
     padding: 0.5rem;
-    /*height: 100%;*/
     height: auto;
     max-height: none;
 }
@@ -554,7 +439,7 @@ h1, h2 {
 
 /* Listen */
 .stocks-info, .message-item, .portfolio-item {
-    height: 100%;
+    height: auto;
     width: 100%;
     display: flex;
     flex-wrap: wrap;
@@ -565,44 +450,6 @@ h1, h2 {
 
 .stocks-info:last-child, .news-item:last-child, .message-item:last-child, .portfolio-item:last-child {
     border-bottom: none;
-}
-
-.toast {
-    background-color: var(--secondary-800);
-    color: white;
-    border-radius: .3rem;
-    box-shadow: var(--box-shadow);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: .9rem;
-    animation: slideIn .2s ease-out;
-    position: relative;
-}
-
-#fehlerMeldung {
-    grid-area: fehlerMeldung;
-    background: var(--secondary-50);
-    border-left: 4px solid var(--secondary-800);
-    min-height: 4rem;
-    padding: 0.75rem;
-    font-size: 0.9rem;
-    color: var(--neutral-800);
-    position: sticky;
-    bottom: 0;
-    z-index: 30;
-}
-
-.toast-close {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    margin-left: .5rem;
 }
 
 @keyframes slideIn {
@@ -640,36 +487,177 @@ h1, h2 {
     }
 }
 
+/* TOST ANZEIGE */
 
-/* TEST */
+#toast-container {
+    position: fixed;
+    bottom: 1rem;
+    right: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    z-index: 9999;
+}
+
+.toast {
+    backdrop-filter: blur(6px);
+    color: var(--neutral-950);
+    border-radius: 0.5rem;
+    box-shadow: var(--box-shadow);
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    pointer-events: auto;
+}
+
+.toast-error {
+    background: rgba(255, 80, 80, 0.15);
+    border-left: 6px solid #c62828;
+}
+
+.toast-success {
+    background: rgba(50, 200, 50, 0.15);
+    border-left: 4px solid #2b8a3e;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    margin-left: .5rem;
+}
+
+.section-title{
+    font-size: 1.2rem;
+    color: var(--neutral-900);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* TITEL */
+
+#stocks-container::before {
+    content: "Verfügbare Aktien";
+    display: block;
+    font-size: 1.2rem;
+    color: var(--neutral-900);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+#portfolio-container::before {
+    content: "Portfolio";
+    display: block;
+    font-size: 1.2rem;
+    color: var(--neutral-900);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+#ranking-list-container::before {
+    content: "Top Spieler";
+    display: block;
+    font-size: 1.2rem;
+    color: var(--neutral-900);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+
+/* HANDY */
 
 @media (max-width: 768px) {
 
 
     main {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        margin-top: 3.5rem;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem;
+        margin-top: 6rem;
+        padding: 0.75rem;
 
         section {
-            max-height: none;
             width: 100%;
+            padding: 1rem;
+            max-width: 100%;
         }
 
-        nav {
-            flex-direction: column;
-            align-items: center;
-            gap: 0.25rem;
-            text-align: center;
+        /* CHART */
+        #stocks-container{
+            height: auto;
         }
 
-        .ranking-item,
-        .stocks-info,
-        .message-item {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.25rem;
+        .stock-chart{
+            height: 260px !important; /* Javoll */
+        }
+
+        /* SMS */
+        #message-container{
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* TASTEN */
+        .recipient-selector-container{
+            flex-direction: row;
+            gap: 0.4rem;
+        }
+
+        /* DEPOT */
+        .quick-select{
+            flex-wrap: wrap;
+        }
+
+        .quick-select-btn-buy,
+        .quick-select-btn-sell{
+            flex: 1 1 calc(50% - 0.5rem);
+        }
+
+        /* RANK */
+        .ranking-item{
+            grid-template-columns: 1.5rem 1fr auto;
+        }
+
+        /* TOSTER */
+        #toast-container{
+            left: 1rem;
+            right: auto;
+            bottom: 1rem;
+        }
+
+        /* REIHENFOLGE kannst ändern falls du willst*/
+        #stock-container {
+            order: 1;
+        }
+
+        #stocks-container {
+            order: 2;
+        }
+
+        #depot {
+            order: 3;
+        }
+
+        #portfolio-container {
+            order: 4;
+        }
+
+        #ranking-list-container {
+            order: 5;
+        }
+
+        #message-sender {
+            order: 6;
+        }
+
+        #message-container {
+            order: 7;
         }
     }
 }

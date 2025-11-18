@@ -492,6 +492,9 @@ async function renderCharts() {
         data: chartData,
         options: {
             responsive: true,
+            // TEST
+            maintainAspectRatio: false,
+            // TEST
             animation: null,
             plugins: {
                 title: {
