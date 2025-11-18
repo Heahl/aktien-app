@@ -189,11 +189,6 @@ h1, h2 {
     margin-bottom: .5rem;
 }
 
-/* portfolio */
-#stocks-container {
-    grid-area: stocks;
-}
-
 #stocks-template {
 }
 
@@ -209,13 +204,12 @@ h1, h2 {
     /*display: flex;*/
     display: block;
     align-items: center;
-
     justify-content: flex-start;
     /*padding-top: 1.5rem;*/
     /*min-height: 26rem;*/
     /*height: auto;*/
     padding: 1.5rem;
-    height: 40rem;
+    height: 100%;
 }
 
 .stock-chart {
@@ -225,11 +219,13 @@ h1, h2 {
 }
 
 /* Trading bereich */
-#depot {
-    grid-area: depot;
+.depot {
+    grid-area: tradingBlock;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    gap: 1rem;
+    align-items: stretch;
 }
 
 #trading-container {
@@ -314,6 +310,7 @@ h1, h2 {
 #stocks-container {
     grid-area: stocks;
     overflow-y: auto;
+    align-self: stretch;
 }
 
 #stocks-template {

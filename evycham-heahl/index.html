@@ -45,48 +45,48 @@
         </template>
     </section>
 
-    <!--  TEST -->
-    <div id="tradingBlock">
-        <!-- Kaufen/Verkaufen -->
-        <section id="depot">
-            <div id="trading-container">
-                <h2>Handeln</h2>
-                <div class="trading-tabs">
-                    <button id="buy-tab" class="trade-tab active">Kaufen</button>
-                    <button id="sell-tab" class="trade-tab">Verkaufen</button>
-                </div>
+    <!-- Kaufen/Verkaufen -->
+    <section id="depot">
+        <div id="trading-container">
+            <h2>Handeln</h2>
+            <div class="trading-tabs">
+                <button id="buy-tab" class="trade-tab active">Kaufen</button>
+                <button id="sell-tab" class="trade-tab">Verkaufen</button>
             </div>
-            <div class="trading-field">
-                <label for="amount">Anzahl Aktien</label>
-                <input type="number" id="amount" placeholder="0" step="1" min="1">
+        </div>
+        <div class="trading-field">
+            <label for="amount">Anzahl Aktien</label>
+            <input type="number" id="amount" placeholder="0" step="1" min="1">
+        </div>
+        <div class="trading-field">
+            <label for="asset-selector">Aktie:</label>
+            <select name="asset-selector" id="asset-selector"></select>
+        </div>
+        <button id="review-order" class="review-button">Bestellung prüfen</button>
+        <!-- Kauf-Buttons -->
+        <div class="trading-field">
+            <p></p><p></p>
+            <h3>Direkt Kaufen</h3>
+            <div class="quick-select">
+                <button class="quick-select-btn-buy" data-amount="10">10</button>
+                <button class="quick-select-btn-buy" data-amount="50">50</button>
+                <button class="quick-select-btn-buy" data-amount="100">100</button>
+                <button class="quick-select-btn-buy" data-amount="500">500</button>
             </div>
-            <div class="trading-field">
-                <label for="asset-selector">Aktie:</label>
-                <select name="asset-selector" id="asset-selector"></select>
-            </div>
-            <button id="review-order" class="review-button">Bestellung prüfen</button>
-            <!-- Kauf-Buttons -->
-            <div class="trading-field">
-                <h3>Direkt Kaufen</h3>
-                <div class="quick-select">
-                    <button class="quick-select-btn-buy" data-amount="10">10</button>
-                    <button class="quick-select-btn-buy" data-amount="50">50</button>
-                    <button class="quick-select-btn-buy" data-amount="100">100</button>
-                    <button class="quick-select-btn-buy" data-amount="500">500</button>
-                </div>
-            </div>
+        </div>
 
-            <!-- Verkauf-Buttons -->
-            <div class="trading-field">
-                <h3>Direkt Verkaufen</h3>
-                <div class="quick-select">
-                    <button class="quick-select-btn-sell" data-amount="10">10</button>
-                    <button class="quick-select-btn-sell" data-amount="50">50</button>
-                    <button class="quick-select-btn-sell" data-amount="100">100</button>
-                    <button class="quick-select-btn-sell" data-amount="500">500</button>
-                </div>
+        <!-- Verkauf-Buttons -->
+        <div class="trading-field">
+            <p></p><p></p>
+            <h3>Direkt Verkaufen</h3>
+            <div class="quick-select">
+                <button class="quick-select-btn-sell" data-amount="10">10</button>
+                <button class="quick-select-btn-sell" data-amount="50">50</button>
+                <button class="quick-select-btn-sell" data-amount="100">100</button>
+                <button class="quick-select-btn-sell" data-amount="500">500</button>
             </div>
-        </section>
+        </div>
+    </section>
 
 <!--        &lt;!&ndash; Rangliste aller Spieler &ndash;&gt;-->
 
@@ -101,7 +101,6 @@
 <!--            </template>-->
 <!--        </section>-->
 
-    </div>
 
     <!-- Rangliste aller Spieler -->
 
