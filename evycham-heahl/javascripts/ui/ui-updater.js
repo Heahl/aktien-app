@@ -381,7 +381,25 @@ function showToast(message, status, type = "error") {
     if (statusElement) statusElement.textContent = `Status: ${status}`;
     if (messageElement) messageElement.textContent = message;
     // falls wir später noch andere Typen implementieren wollen (zB. warning)
-    if (toast) toast.className = `toast toast-${type}`;
+
+    // TEST UNTEN
+
+    // if (toast) toast.className = `toast toast-${type}`;
+
+
+    // TEXT && FARBE
+
+    if(toast) {
+        if (status >= 200 && status < 300) {
+            statusElement.textContent = `Erfolg (${status})`;
+            toast.classList.add('toast-success');
+        }
+        statusElement.textContent = `Fehler (${status})`;
+        toast.classList.add('toast-error');
+    }
+
+    // TEST OBEN
+
     if (closeBtn) closeBtn.addEventListener('click', () => {
         toast.remove();
     });
