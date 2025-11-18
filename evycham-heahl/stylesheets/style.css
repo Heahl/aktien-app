@@ -597,53 +597,67 @@ h1, h2 {
             height: 260px !important; /* Javoll */
         }
 
-        /* REIHENFOLGE kannst ändern falls du willst*/
-        #stocks-container{
-            order: 1;
-        }
-        #stocks-container{
-            order: 2;
-        }
-        #depot{
-            order: 3;
-        }
-        #rank-list-container{
-            order: 4;
-        }
-        #message-sender{
-            order: 5;
-        }
-        #message-container{
-            order: 6;
-        }
-        #portfolio-container{
-            order: 7;
-        }
-
         /* SMS */
         #message-container{
             max-height: 300px;
             overflow-y: auto;
         }
 
-        #message-sender{
-            max-width: 300px;
-            overflow-y: auto;
+        /* TASTEN */
+        .recipient-selector-container{
+            flex-direction: row;
+            gap: 0.4rem;
         }
 
-        nav {
-            flex-direction: column;
-            align-items: center;
-            gap: 0.25rem;
-            text-align: center;
+        /* DEPOT */
+        .quick-select{
+            flex-wrap: wrap;
         }
 
-        .ranking-item,
-        .stocks-info,
-        .message-item {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.25rem;
+        .quick-select-btn-buy,
+        .quick-select-btn-sell{
+            flex: 1 1 calc(50% - 0.5rem);
+        }
+
+        /* RANK */
+        .ranking-item{
+            grid-template-columns: 1.5rem 1fr auto;
+        }
+
+        /* TOSTER */
+        #toast-container{
+            left: 1rem;
+            right: auto;
+            bottom: 1rem;
+        }
+
+        /* REIHENFOLGE kannst ändern falls du willst*/
+        #stock-container {
+            order: 1;
+        }
+
+        #stocks-container {
+            order: 2;
+        }
+
+        #depot {
+            order: 3;
+        }
+
+        #portfolio-container {
+            order: 4;
+        }
+
+        #ranking-list-container {
+            order: 5;
+        }
+
+        #message-sender {
+            order: 6;
+        }
+
+        #message-container {
+            order: 7;
         }
     }
 }
