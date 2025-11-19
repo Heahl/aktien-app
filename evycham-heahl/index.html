@@ -5,15 +5,16 @@
     <!-- bei jeder neuen Datei ohne defer direkt nach charset einfügen!
     <script src="javascripts/auth/auth-check.js"></script> -->
     <meta content="width=device-width, height=device-height, initial-scale=1" name="viewport">
-    <link href="/stylesheets/style.css" rel="stylesheet">    <!-- chart.js -->
+    <link href="./stylesheets/style.css" rel="stylesheet">    <!-- chart.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
     <!-- hier die anderen Skripts hin -->
     <!-- <script src="javascripts/auth/deauth.js" defer></script> -->
-    <script src="javascripts/api/api-client.js" defer></script>
-    <script src="javascripts/ui/ui-updater.js" defer></script>
-    <script src="javascripts/trading/trading-strategy.js"></script>
+    <script src="./javascripts/utils.js" defer></script>
+    <script src="./javascripts/api-client.js" defer></script>
+    <script src="./javascripts/ui-updater.js" defer></script>
+    <script src="./javascripts/trading-strategy.js" defer></script>
     <!-- alle scripts vor diesem einbinden -->
-    <script src="javascripts/main.js" defer></script>
+    <script src="./javascripts/main.js" defer></script>
     <title>Dashboard</title>
 </head>
 <body>
@@ -45,68 +46,51 @@
         </template>
     </section>
 
-    <!--  TEST -->
-    <div id="tradingBlock">
-        <!-- Kaufen/Verkaufen -->
-        <section id="depot">
-            <div id="trading-container">
-                <h2>Handeln</h2>
-                <div class="trading-tabs">
-                    <button id="buy-tab" class="trade-tab active">Kaufen</button>
-                    <button id="sell-tab" class="trade-tab">Verkaufen</button>
-                </div>
+    <!-- Kaufen/Verkaufen -->
+    <section id="depot">
+        <div id="trading-container">
+            <h2>Handeln</h2>
+            <div class="trading-tabs">
+                <button id="buy-tab" class="trade-tab active">Kaufen</button>
+                <button id="sell-tab" class="trade-tab">Verkaufen</button>
             </div>
-            <div class="trading-field">
-                <label for="amount">Anzahl Aktien</label>
-                <input type="number" id="amount" placeholder="0" step="1" min="1">
+        </div>
+        <div class="trading-field">
+            <label for="amount">Anzahl Aktien</label>
+            <input type="number" id="amount" placeholder="0" step="1" min="1">
+        </div>
+        <div class="trading-field">
+            <label for="asset-selector">Aktie:</label>
+            <select name="asset-selector" id="asset-selector"></select>
+        </div>
+        <button id="review-order" class="review-button">Bestellung prüfen</button>
+        <!-- Kauf-Buttons -->
+        <div class="trading-field">
+            <h3>Direkt Kaufen</h3>
+            <div class="quick-select">
+                <button class="quick-select-btn-buy" data-amount="10">10</button>
+                <button class="quick-select-btn-buy" data-amount="50">50</button>
+                <button class="quick-select-btn-buy" data-amount="100">100</button>
+                <button class="quick-select-btn-buy" data-amount="500">500</button>
             </div>
-            <div class="trading-field">
-                <label for="asset-selector">Aktie:</label>
-                <select name="asset-selector" id="asset-selector"></select>
-            </div>
-            <button id="review-order" class="review-button">Bestellung prüfen</button>
-            <!-- Kauf-Buttons -->
-            <div class="trading-field">
-                <h3>Direkt Kaufen</h3>
-                <div class="quick-select">
-                    <button class="quick-select-btn-buy" data-amount="10">10</button>
-                    <button class="quick-select-btn-buy" data-amount="50">50</button>
-                    <button class="quick-select-btn-buy" data-amount="100">100</button>
-                    <button class="quick-select-btn-buy" data-amount="500">500</button>
-                </div>
-            </div>
+        </div>
 
-            <!-- Verkauf-Buttons -->
-            <div class="trading-field">
-                <h3>Direkt Verkaufen</h3>
-                <div class="quick-select">
-                    <button class="quick-select-btn-sell" data-amount="10">10</button>
-                    <button class="quick-select-btn-sell" data-amount="50">50</button>
-                    <button class="quick-select-btn-sell" data-amount="100">100</button>
-                    <button class="quick-select-btn-sell" data-amount="500">500</button>
-                </div>
+        <!-- Verkauf-Buttons -->
+        <div class="trading-field">
+            <h3>Direkt Verkaufen</h3>
+            <div class="quick-select">
+                <button class="quick-select-btn-sell" data-amount="10">10</button>
+                <button class="quick-select-btn-sell" data-amount="50">50</button>
+                <button class="quick-select-btn-sell" data-amount="100">100</button>
+                <button class="quick-select-btn-sell" data-amount="500">500</button>
             </div>
-        </section>
-
-<!--        &lt;!&ndash; Rangliste aller Spieler &ndash;&gt;-->
-
-<!--        <section id="ranking-list-container">-->
-<!--            <h2 class="ranking-title">Top Spieler</h2>-->
-<!--            <template id="ranking-item-template">-->
-<!--                <div class="ranking-item">-->
-<!--                    <span class="rank-column"></span>-->
-<!--                    <span class="player-column"></span>-->
-<!--                    <span class="value-column"></span>-->
-<!--                </div>-->
-<!--            </template>-->
-<!--        </section>-->
-
-    </div>
+        </div>
+    </section>
 
     <!-- Rangliste aller Spieler -->
 
     <section id="ranking-list-container">
-        <h2 class="ranking-title">Top Spieler</h2>
+        <h2 class="ranking-title">Spieler</h2>
         <template id="ranking-item-template">
             <div class="ranking-item">
                 <span class="rank-column"></span>
@@ -115,6 +99,20 @@
             </div>
         </template>
     </section>
+    <!--     News
+        <section id="news-container">
+            <div class="news-controls">
+                <button id="newsLastHour">Stunde</button>
+                <button id="newsLastDay">Tag</button>
+                <button id="newsLastTwenty">Alle</button>
+            </div>
+            <template id="news-template">
+                <div class="news-item">
+                    <span class="news-time"></span>
+                    <span class="news-text"></span>
+                </div>
+            </template>
+        </section> -->
 
     <!-- Nachrichten senden -->
     <section id="message-sender">
@@ -125,10 +123,6 @@
         <div class="message-field">
             <label>Empfänger:</label>
             <div id="recipient-selector-container" class="recipient-selector-container">
-                <button class="recipient-btn" data-recipient="max">max</button>
-                <button class="recipient-btn" data-recipient="moritz">moritz</button>
-                <button class="recipient-btn" data-recipient="lempel">lempel</button>
-                <button class="recipient-btn" data-recipient="bolte">bolte</button>
             </div>
         </div>
 
@@ -137,7 +131,6 @@
 
     <!-- Portfolio des Spielers -->
     <section id="portfolio-container">
-        <h2 class="section-title">Portfolio</h2>
         <template id="portfolio-template">
             <div class="portfolio-item">
                 <span class="portfolio-name"></span>
@@ -145,20 +138,6 @@
             </div>
         </template>
     </section>
-
-<!--    <section id="news-container">-->
-<!--        <div class="news-controls">-->
-<!--            <button id="newsLastHour">Stunde</button>-->
-<!--            <button id="newsLastDay">Tag</button>-->
-<!--            <button id="newsLastTwenty">Alle</button>-->
-<!--        </div>-->
-<!--        <template id="news-template">-->
-<!--            <div class="news-item">-->
-<!--                <span class="news-time"></span>-->
-<!--                <span class="news-text"></span>-->
-<!--            </div>-->
-<!--        </template>-->
-<!--    </section>-->
 
     <!-- Nachrichten -->
     <section id="message-container">

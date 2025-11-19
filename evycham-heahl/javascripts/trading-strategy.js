@@ -1,8 +1,3 @@
-/*********************************************************************
- *  Bullet-proof statistical ensemble bot
- *  – ONE external toggle:  window.botOn  (true = trade, false = simulate)
- *  – defaults to OFF so you can safely reload the page
- *********************************************************************/
 class TradingStrategy {
     constructor() {
         this.history = new Map(); // stock -> [ {t, p, step} ]
@@ -14,14 +9,9 @@ class TradingStrategy {
         this.peakBalance = null;
         this.maxSharesPerOrder = 500;   // never send more than 500 shares in one order
         this.skipCache = new Map();   // stock -> timestamp of last printed skip
-        /* ----------  NEW: safety switch  ---------- */
         this.botOn = false;          // OFF by default
     }
 
-    /* --------------------------------------------------------------- */
-    /*  public API – unchanged signatures                              */
-
-    /* --------------------------------------------------------------- */
     async updateHistory(stockName, price) {
         const now = Date.now();
         const step = Math.floor(now / 500);
@@ -35,7 +25,8 @@ class TradingStrategy {
 
     async updateAllStocks() {
         const res = await getStocks();
-        if (!res.success) return;
+        if (!res || !res.success || !res.data) return;
+        if (!res.data) return; // 304: Keine neuen Daten, aber kein Fehler
         for (const s of res.data) await this.updateHistory(s.name, s.price);
     }
 
@@ -43,16 +34,17 @@ class TradingStrategy {
         await this.refreshAccount();
         if (this.account.balance === 0) return;
         if (!this.peakBalance) this.peakBalance = this.account.balance;
-        /* ----------  auto-resetting draw-down brake  ---------- */
         if (this.account.balance < this.peakBalance * (1 - this.maxDrawDown)) {
-            console.warn('[BOT] auto-reset draw-down brake');
+            // console.warn('[BOT] auto-reset draw-down brake');
             this.peakBalance = this.account.balance; // reset and continue
-            return;                                  // skip only *this* tick
+            return;                                  // skip only this tick
         }
         if (this.account.balance > this.peakBalance) this.peakBalance = this.account.balance;
 
-        const stocks = await getStocks().then(r => r.success ? r.data : []);
-        for (const s of stocks) {
+        const stocksRes = await getStocks();
+        if (!stocksRes || !stocksRes.success || !Array.isArray(stocksRes.data)) return;
+
+        for (const s of stocksRes.data) {
             if (s.name === '-') continue;
             const signal = this.ensembleVote(s.name);
             if (signal === 0) continue;
@@ -63,20 +55,14 @@ class TradingStrategy {
             if (Math.abs(delta) < 1) continue;
             const clip = this.randomiseClip(delta);
 
-            /* ----------  NEW: only act if toggle is ON  ---------- */
             if (this.botOn) {
                 await this.executeTrade(s.name, clip > 0 ? 'buy' : 'sell', Math.abs(clip));
             } else {
-                /* still print what we *would* have done – keeps log comparable */
-                console.log(`[SIM] ${clip > 0 ? 'BUY' : 'SELL'} ${Math.abs(clip)} ${s.name}  (price ${s.price})`);
+                // console.log(`[SIM] ${clip > 0 ? 'BUY' : 'SELL'} ${Math.abs(clip)} ${s.name}  (price ${s.price})`);
             }
         }
     }
 
-    /* --------------------------------------------------------------- */
-    /*  internal machinery                                             */
-
-    /* --------------------------------------------------------------- */
     ensureStrategies(stock) {
         if (this.strategies.has(stock)) return;
         const S = [
@@ -92,7 +78,7 @@ class TradingStrategy {
 
     updateRegimeFeatures(stock) {
         const h = this.history.get(stock);
-        if (h.length < 30) return;
+        if (!h || h.length < 30) return;
         for (const strat of this.strategies.get(stock)) {
             const ret = strat.update(h);
             if (ret != null) strat.sharpe = this.rollingSharpe(strat.returns);
@@ -138,14 +124,13 @@ class TradingStrategy {
         if (cnt === 0) return 0;
 
         const kelly = (avgWin * winProb - avgLoss * (1 - winProb)) / (avgWin * avgLoss || 1);
-        const maxSpend = this.maxPos * this.account.balance;   // ← declare before use
+        const maxSpend = this.maxPos * this.account.balance;
         let shares = Math.floor(maxSpend * Math.min(Math.max(kelly, 0), 0.25) / price);
 
         return (isFinite(shares) && shares > 0) ? shares : 0;
     }
 
     randomiseClip(delta) {
-        // add noise and never show exact size
         const sign = Math.sign(delta);
         const abs = Math.abs(delta);
         const noisy = Math.floor(abs * (0.9 + 0.2 * Math.random()));
@@ -165,12 +150,21 @@ class TradingStrategy {
 
     async refreshAccount() {
         const u = await getUser();
-        if (!u.success) return;
+        if (!u || !u.success || !u.data) return;
         const a = await getAccount();
-        if (!a.success) return;
+        if (!a || !a.success || !a.data) return;
+
         this.account.balance = u.data.balance;
         this.account.positions.clear();
-        a.data.positions.forEach(p => this.account.positions.set(p.stock.name, p.number));
+
+        // SICHERHEITSABFRAGE: Prüfen, ob positions existiert und Array ist
+        if (a.data.positions && Array.isArray(a.data.positions)) {
+            a.data.positions.forEach(p => {
+                if (p && p.stock && p.stock.name !== undefined && p.number !== undefined) {
+                    this.account.positions.set(p.stock.name, p.number);
+                }
+            });
+        }
     }
 
     async executeTrade(stock, action, amount) {
@@ -184,37 +178,34 @@ class TradingStrategy {
             const now = Date.now();
             const last = this.skipCache.get(stock);
             if (!last || now - last > 60_000) {          // print once per minute
-                console.warn(`[SKIP] wanted to SELL ${amount} ${stock} but only own ${owned}`);
+                // console.warn(`[SKIP] wanted to SELL ${amount} ${stock} but only own ${owned}`);
                 this.skipCache.set(stock, now);
             }
             return;
         }
 
-        /* ----------  buy-side hard cap  ---------- */
         if (action === 'buy') {
-            const price = (await getStocks()).data.find(s => s.name === stock)?.price || 0;
-            if (!price || price <= 0) return;          // illiquid stock
+            const stocksRes = await getStocks();
+            if (!stocksRes || !stocksRes.success || !Array.isArray(stocksRes.data)) return;
+
+            const stockData = stocksRes.data.find(s => s.name === stock);
+            if (!stockData || !stockData.price || stockData.price <= 0) return;
+
+            const price = stockData.price;
             const maxAffordable = Math.floor(this.account.balance * 0.95 / price);
             amount = Math.min(amount, maxAffordable);
             if (amount < 1) return;                    // can't even afford 1 share
         }
-        /* ----------  absolute server limit  ---------- */
         amount = Math.min(amount, this.maxSharesPerOrder);
-        /* ----------  keep the existing integer rounding  ---------- */
         amount = Math.floor(amount);
-        /* ----------  3.  absolute server limit  ---------- */
-        amount = Math.min(amount, this.maxSharesPerOrder);
 
         const dir = action === 'buy' ? amount : -amount;
         const r = await postPositions(stock, dir);
-        if (r.success) console.log(`[LIVE] ${action.toUpperCase()} ${amount} ${stock}`);
-        else console.warn(`[LIVE] 422 – server rejected ${action} ${amount} ${stock}`);
+        //if (r.success) // console.log(`[LIVE] ${action.toUpperCase()} ${amount} ${stock}`);
+        //else // console.warn(`[LIVE] 422 – server rejected ${action} ${amount} ${stock}`);
     }
 }
 
-/* ===================================================================
- *  Micro-strategies – kept intentionally simple so they run on-line
- * =================================================================== */
 class MeanReverter {
     constructor() {
         this.returns = [];
@@ -326,23 +317,11 @@ class OrderImpactProbe {
     }
 }
 
-/* ----------  global instance + toggle  ---------- */
 window.tradingStrategy = new TradingStrategy();
-/* expose the toggle so you can flip it from console or a button */
-window.botOn = () => window.tradingStrategy.botOn;
 window.setBot = (on) => {
     window.tradingStrategy.botOn = Boolean(on);
-    console.log(`[BOT] ${window.tradingStrategy.botOn ? 'ARMED' : 'DISARMED'}`);
+    // console.log(`[BOT] ${window.tradingStrategy.botOn ? 'ARMED' : 'DISARMED'}`);
 };
-window.resetDrawDown = () => {
-    window.tradingStrategy.peakBalance = window.tradingStrategy.account.balance;
-    console.log('[BOT] Draw-down brake reset');
-};
-window.resetBrake = () => {
-    window.tradingStrategy.peakBalance = window.tradingStrategy.account.balance;
-    console.log('[BOT] Draw-down brake reset – you can trade again');
-};
-window.tradingStrategy.maxDrawDown = 0.30;   // 30 % instead of 10 %
 window.tradingStrategy.skipCache.clear();
 /* start in safe mode */
 window.setBot(false);
