@@ -58,7 +58,7 @@ async function apiCall(endpoint, options = {}, params = null) {
 
         return result;
     } catch (e) {
-        console.error('Netzwerkfehler:', e.message);
+        // console.error('Netzwerkfehler:', e.message);
         return {
             success: false,
             error: {
@@ -158,17 +158,17 @@ async function getEverybody() {
 function validateStockParameters(stockName, number) {
     // Typ prüfen
     if (typeof stockName !== "string" || typeof number !== "number") {
-        console.error('Ungültige Parameter');
+        // console.error('Ungültige Parameter');
         return false;
     }
     // Wertebereich prüfen
     if (number === 0) {
-        console.error('Anzahl darf nicht 0 sein');
+        // console.error('Anzahl darf nicht 0 sein');
         return false;
     }
     // Stringlänge prüfen
     if (stockName.length > 50 || stockName.length === 0) {
-        console.error('Ungültiger Aktienname');
+        // console.error('Ungültiger Aktienname');
         return false;
     }
     return true;
@@ -210,16 +210,16 @@ async function postPositions(stockName, number) {
 function validateMessageParameters(recipient, message) {
     // Typ prüfen
     if (typeof recipient !== 'string' || typeof message !== 'string') {
-        console.error('Ungültige Parameter: beide müssen string sein.');
+        // console.error('Ungültige Parameter: beide müssen string sein.');
         return false;
     }
     // Länge prüfen
     if (recipient.trim().length === 0 || message.trim().length === 0) {
-        console.error('Empfänger / Nachricht zu kurz');
+        // console.error('Empfänger / Nachricht zu kurz');
         return false;
     }
     if (recipient.length > 50 || message.length > 500) {
-        console.error('Empfänger / Nachricht zu lang');
+        // console.error('Empfänger / Nachricht zu lang');
         return false;
     }
     return true;
@@ -239,7 +239,7 @@ async function postMessages(recipient, message) {
         const recipients = recipient;
 
         if (recipients.length === 0) {
-            console.error('Ungültige Empfängerliste: Muss Array mit mindestens einem Empfänger sein');
+            // console.error('Ungültige Empfängerliste: Muss Array mit mindestens einem Empfänger sein');
             return {
                 success: false,
                 sent: 0,
@@ -250,7 +250,7 @@ async function postMessages(recipient, message) {
 
         // Validierung der Nachricht (für alle Empfänger gemeinsam)
         if (typeof message !== 'string' || message.trim().length === 0 || message.length > 500) {
-            console.error('Ungültige Nachricht: Muss String mit 1-500 Zeichen sein');
+            // console.error('Ungültige Nachricht: Muss String mit 1-500 Zeichen sein');
             return {
                 success: false,
                 sent: 0,

@@ -98,7 +98,7 @@ class TradingStrategy {
         if (this.account.balance === 0) return;
         if (!this.peakBalance) this.peakBalance = this.account.balance;
         if (this.account.balance < this.peakBalance * (1 - this.maxDrawDown)) {
-            // console.warn('[BOT] auto-reset draw-down brake');
+            // // console.warn('[BOT] auto-reset draw-down brake');
             this.peakBalance = this.account.balance; // reset and continue
             return;                                  // skip only this tick
         }
@@ -121,7 +121,7 @@ class TradingStrategy {
             if (this.botOn) {
                 await this.executeTrade(s.name, clip > 0 ? 'buy' : 'sell', Math.abs(clip));
             } else {
-                // console.log(`[SIM] ${clip > 0 ? 'BUY' : 'SELL'} ${Math.abs(clip)} ${s.name}  (price ${s.price})`);
+                // // console.log(`[SIM] ${clip > 0 ? 'BUY' : 'SELL'} ${Math.abs(clip)} ${s.name}  (price ${s.price})`);
             }
         }
     }
@@ -286,7 +286,7 @@ class TradingStrategy {
             const now = Date.now();
             const last = this.skipCache.get(stock);
             if (!last || now - last > 60_000) {          // print once per minute
-                // console.warn(`[SKIP] wanted to SELL ${amount} ${stock} but only own ${owned}`);
+                // // console.warn(`[SKIP] wanted to SELL ${amount} ${stock} but only own ${owned}`);
                 this.skipCache.set(stock, now);
             }
             return;
@@ -309,8 +309,8 @@ class TradingStrategy {
 
         const dir = action === 'buy' ? amount : -amount;
         const r = await postPositions(stock, dir);
-        //if (r.success) // console.log(`[LIVE] ${action.toUpperCase()} ${amount} ${stock}`);
-        //else // console.warn(`[LIVE] 422 – server rejected ${action} ${amount} ${stock}`);
+        //if (r.success) // // console.log(`[LIVE] ${action.toUpperCase()} ${amount} ${stock}`);
+        //else // // console.warn(`[LIVE] 422 – server rejected ${action} ${amount} ${stock}`);
     }
 }
 
@@ -547,7 +547,7 @@ window.tradingStrategy = new TradingStrategy();
  */
 window.setBot = (on) => {
     window.tradingStrategy.botOn = Boolean(on);
-    // console.log(`[BOT] ${window.tradingStrategy.botOn ? 'ARMED' : 'DISARMED'}`);
+    // // console.log(`[BOT] ${window.tradingStrategy.botOn ? 'ARMED' : 'DISARMED'}`);
 };
 /**
  * Löscht den Skip-Cache beim Start

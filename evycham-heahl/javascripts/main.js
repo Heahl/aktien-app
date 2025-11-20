@@ -59,10 +59,10 @@ async function init() {
         // Polling starten
         startPolling();
 
-        console.log('Anwendung erfolgreich initialisiert');
+        // console.log('Anwendung erfolgreich initialisiert');
 
     } catch (error) {
-        console.error('Fehler bei der Initialisierung:', error);
+        // console.error('Fehler bei der Initialisierung:', error);
         showToast('Fehler bei der Initialisierung: ' + error.message, 0);
     }
 }

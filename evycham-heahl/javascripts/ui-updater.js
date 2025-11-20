@@ -11,7 +11,7 @@
 function getElementSafe(id, context = '') {
     const element = document.getElementById(id);
     if (!element) {
-        console.error(`Element mit der id '${id}' nicht gefunden${context ? ' (' + context + ')' : ''}.`);
+        // console.error(`Element mit der id '${id}' nicht gefunden${context ? ' (' + context + ')' : ''}.`);
     }
     return element;
 }
@@ -25,7 +25,7 @@ function getElementSafe(id, context = '') {
 function getTemplateSafe(id, context = '') {
     const template = document.getElementById(id);
     if (!template) {
-        console.error(`Template mit id "${id}" nicht gefunden${context ? ' (' + context + ')' : ''}.`);
+        // console.error(`Template mit id "${id}" nicht gefunden${context ? ' (' + context + ')' : ''}.`);
     }
     return template;
 }
@@ -346,17 +346,17 @@ async function populateRecipientSelector() {
                         selectedRecipients.add(user.name);
                         button.classList.add('selected');
                     }
-                    console.log('Ausgewählte Empfänger:', Array.from(selectedRecipients));
+                    // console.log('Ausgewählte Empfänger:', Array.from(selectedRecipients));
                 });
 
                 container.appendChild(button);
             });
         } else {
-            console.error("Fehler bei getEverybody():", result.error);
+            // console.error("Fehler bei getEverybody():", result.error);
             showToast(result.error.message, result.error.status);
         }
     } catch (e) {
-        console.error('Fehler beim Laden der Nutzer:', e.message);
+        // console.error('Fehler beim Laden der Nutzer:', e.message);
         showToast("Fehler beim Laden der Nutzer", e.message);
     }
 }
@@ -414,13 +414,13 @@ async function generateChartData() {
     // hole aktuelle kurse
     const stocksResult = await getStocks();
     if (!stocksResult.success) {
-        console.error('Fehler beim Laden der Aktien für Chart:', stocksResult.error);
+        // console.error('Fehler beim Laden der Aktien für Chart:', stocksResult.error);
         showToast(stocksResult.error.message, stocksResult.error.status);
         return {labels: [], datasets: []};
     }
     const allStocks = stocksResult.data;
 
-    // // // console.log('allStocks:', allStocks);
+    // // // // console.log('allStocks:', allStocks);
     // Zeitstempel hinzufügen
     const now = Date.now();
 
@@ -442,13 +442,13 @@ async function generateChartData() {
 
     // Zeitstempel von der ersten Aktie nehmen
     const firstStockName = allStocks[0]?.name;
-    // // // console.log('firstStockName:', firstStockName);
+    // // // // console.log('firstStockName:', firstStockName);
     const labels = window.stockHistory[firstStockName]?.map(item => {
         const date = new Date(item.timestamp);
         return date.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
     }) || [];
 
-    // // // console.log('labels:', labels);
+    // // // // console.log('labels:', labels);
     // Daten für jede Aktie aufbereiten
     const datasets = allStocks.map((stock, index) => {
         // Farbe für die Linie festlegen
@@ -465,7 +465,7 @@ async function generateChartData() {
         const color = colors[index % colors.length];
         const data = window.stockHistory[stock.name]?.map(item => item.price) || [];
 
-        // // // console.log('dataset data for', stock.name, ':', data);
+        // // // // console.log('dataset data for', stock.name, ':', data);
 
         return {
             label: stock.name,
@@ -477,7 +477,7 @@ async function generateChartData() {
         };
     });
 
-    // // // console.log('datasets:', datasets);
+    // // // // console.log('datasets:', datasets);
     return {
         labels: labels,
         datasets: datasets
@@ -495,7 +495,7 @@ async function renderCharts() {
 
     const canvas = document.querySelector('.stock-chart');
     if (!canvas) {
-        console.error('Canvas nicht gefunden');
+        // console.error('Canvas nicht gefunden');
         return;
     }
     const ctx = canvas.getContext('2d');
