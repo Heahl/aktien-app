@@ -316,7 +316,9 @@ let selectedRecipients = new Set();
  */
 async function populateRecipientSelector() {
     const container = getElementSafe('recipient-selector-container', 'populateRecipientSelector');
+    const username = getElementSafe('username', 'recipient-selector');
     if (!container) return;
+    if(!username) return;
 
     // Container leeren
     while (container.firstChild) {

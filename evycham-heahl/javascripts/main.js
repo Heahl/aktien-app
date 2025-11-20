@@ -3,12 +3,12 @@
 document.addEventListener('DOMContentLoaded', init);
 
 const pollingIntervals = {
-    stocks: 5 * 1000,
-    account: 3 * 1000,
-    ranking: 6 * 1000,
-    messages: 15 * 1000,
-    news: 60 * 1000,
-    trading: .5 * 1000
+    stocks: 5_000,
+    account: 3_000,
+    ranking: 6_000,
+    messages: 15_000,
+    news: 60_000,
+    trading: 500
 };
 
 /*const newsFilters = {
