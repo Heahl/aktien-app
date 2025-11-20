@@ -1,17 +1,71 @@
+/**
+ * Hauptklasse für den Trading Bot mit Ensemble-Strategie
+ * Implementiert verschiedene Handelsstrategien und kombiniert sie zu einem Ensemble-Modell
+ * Unterstützt Mean Reversion, Trend Following, Cycle Detection und andere Ansätze
+ */
 class TradingStrategy {
+    /**
+     * Initialisiert die Trading-Strategie mit Standardparametern
+     */
     constructor() {
+        /**
+         * Preisverlauf pro Aktie - Map mit Array von {t: Zeitstempel, p: Preis, step: Zeitintervall}
+         * @type {Map<string, Array<{t: number, p: number, step: number}>>}
+         */
         this.history = new Map(); // stock -> [ {t, p, step} ]
+        /**
+         * Strategie-Instanzen pro Aktie
+         * @type {Map<string, Array<Strategy>>}
+         */
         this.strategies = new Map(); // stock -> [ StrategyInstance ]
+        /**
+         * Ensemble-Gewichte pro Aktie - Enthält Gewichte und letzte Abstimmung
+         * @type {Map<string, {weights: number[], lastVote: number}>}
+         */
         this.ensemble = new Map(); // stock -> { weights[], lastVote }
+        /**
+         * Kontodaten mit Guthaben und Positionen
+         * @type {{balance: number, positions: Map<string, number>}}
+         */
         this.account = {balance: 0, positions: new Map()};
+        /**
+         * Maximale Position pro Aktie als Anteil des Guthabens (25%)
+         * @type {number}
+         */
         this.maxPos = 0.25;      // 25 % of balance in one stock
+        /**
+         * Maximales Drawdown vor Stop-Handel (30%)
+         * @type {number}
+         */
         this.maxDrawDown = 0.30;      // stop trading after -30 %
+        /**
+         * Höchstes erreichtes Guthaben für Drawdown-Berechnung
+         * @type {?number}
+         */
         this.peakBalance = null;
+        /**
+         * Maximale Anzahl Aktien pro Order
+         * @type {number}
+         */
         this.maxSharesPerOrder = 500;   // never send more than 500 shares in one order
+        /**
+         * Cache für übersprungene Trades (zur Vermeidung von wiederholten Warnungen)
+         * @type {Map<string, number>}
+         */
         this.skipCache = new Map();   // stock -> timestamp of last printed skip
+        /**
+         * Bot-Status (ausgeschaltet per Default)
+         * @type {boolean}
+         */
         this.botOn = false;          // OFF by default
     }
 
+    /**
+     * Aktualisiert den Preisverlauf für eine Aktie und führt notwendige Updates durch
+     * @param {string} stockName - Name der Aktie
+     * @param {number} price - Aktueller Preis
+     * @returns {Promise<void>}
+     */
     async updateHistory(stockName, price) {
         const now = Date.now();
         const step = Math.floor(now / 500);
@@ -23,6 +77,10 @@ class TradingStrategy {
         this.updateRegimeFeatures(stockName);
     }
 
+    /**
+     * Aktualisiert den Preisverlauf für alle verfügbaren Aktien
+     * @returns {Promise<void>}
+     */
     async updateAllStocks() {
         const res = await getStocks();
         if (!res || !res.success || !res.data) return;
@@ -30,6 +88,11 @@ class TradingStrategy {
         for (const s of res.data) await this.updateHistory(s.name, s.price);
     }
 
+    /**
+     * Führt automatischen Handel basierend auf Ensemble-Vorhersagen durch
+     * Berücksichtigt Drawdown-Limits und Positionsgrenzen
+     * @returns {Promise<void>}
+     */
     async autoTrade() {
         await this.refreshAccount();
         if (this.account.balance === 0) return;
@@ -63,6 +126,10 @@ class TradingStrategy {
         }
     }
 
+    /**
+     * Stellt sicher, dass Strategie-Instanzen für eine Aktie vorhanden sind
+     * @param {string} stock - Name der Aktie
+     */
     ensureStrategies(stock) {
         if (this.strategies.has(stock)) return;
         const S = [
@@ -76,6 +143,10 @@ class TradingStrategy {
         this.ensemble.set(stock, {weights: S.map(_ => 1), lastVote: 0});
     }
 
+    /**
+     * Aktualisiert Regime-Features und Sharpe-Ratios für alle Strategien einer Aktie
+     * @param {string} stock - Name der Aktie
+     */
     updateRegimeFeatures(stock) {
         const h = this.history.get(stock);
         if (!h || h.length < 30) return;
@@ -86,6 +157,10 @@ class TradingStrategy {
         this.reweightEnsemble(stock);
     }
 
+    /**
+     * Passt die Ensemble-Gewichte basierend auf den Sharpe-Ratios an
+     * @param {string} stock - Name der Aktie
+     */
     reweightEnsemble(stock) {
         const strats = this.strategies.get(stock);
         const sharps = strats.map(s => Math.max(s.sharpe, 0));
@@ -93,6 +168,11 @@ class TradingStrategy {
         this.ensemble.get(stock).weights = sharps.map(s => s / sum);
     }
 
+    /**
+     * Gibt das Ensemble-Votum für eine Aktie zurück
+     * @param {string} stock - Name der Aktie
+     * @returns {number} -1 (Verkaufen), 0 (Halten) oder 1 (Kaufen)
+     */
     ensembleVote(stock) {
         const strats = this.strategies.get(stock);
         const w = this.ensemble.get(stock).weights;
@@ -102,6 +182,12 @@ class TradingStrategy {
         return Math.sign(vote);
     }
 
+    /**
+     * Berechnet die optimale Positiongröße nach der Kelly-Formel
+     * @param {string} stock - Name der Aktie
+     * @param {number} price - Aktueller Preis
+     * @returns {number} Gewünschte Anzahl Aktien
+     */
     kellySize(stock, price) {
         const strats = this.strategies.get(stock);
         const w = this.ensemble.get(stock).weights;
@@ -130,6 +216,11 @@ class TradingStrategy {
         return (isFinite(shares) && shares > 0) ? shares : 0;
     }
 
+    /**
+     * Randomisiert und begrenzt die Order-Größe mit Rauschen
+     * @param {number} delta - Differenz zur gewünschten Position
+     * @returns {number} Angepasste Order-Größe
+     */
     randomiseClip(delta) {
         const sign = Math.sign(delta);
         const abs = Math.abs(delta);
@@ -137,6 +228,12 @@ class TradingStrategy {
         return Math.max(1, noisy) * sign;
     }
 
+    /**
+     * Berechnet den gleitenden Sharpe-Ratio mit exponentieller Gewichtung
+     * @param {number[]} returns - Array von Returns
+     * @param {number} [halfLife=20] - Halbwertszeit für exponentielle Gewichtung
+     * @returns {number} Rolling Sharpe-Ratio
+     */
     rollingSharpe(returns, halfLife = 20) {
         if (returns.length < 5) return 0;
         let mean = 0, varr = 0, lam = Math.pow(0.5, 1 / halfLife);
@@ -148,6 +245,10 @@ class TradingStrategy {
         return mean / vol;
     }
 
+    /**
+     * Aktualisiert die Kontodaten vom Server
+     * @returns {Promise<void>}
+     */
     async refreshAccount() {
         const u = await getUser();
         if (!u || !u.success || !u.data) return;
@@ -167,6 +268,13 @@ class TradingStrategy {
         }
     }
 
+    /**
+     * Führt einen tatsächlichen Handel aus (Kauf/Verkauf)
+     * @param {string} stock - Name der Aktie
+     * @param {'buy'|'sell'} action - Handelsaktion
+     * @param {number} amount - Anzahl Aktien
+     * @returns {Promise<void>}
+     */
     async executeTrade(stock, action, amount) {
         if (!stock || stock === '-' || !Number.isFinite(amount) || amount <= 0) return;
 
@@ -206,11 +314,27 @@ class TradingStrategy {
     }
 }
 
+/**
+ * Mean Reversion Strategie - Erwartet Preisanpassung an den Durchschnitt
+ * Verwendet 20-Perioden Simple Moving Average für die Signalerkennung
+ */
 class MeanReverter {
+    /**
+     * Initialisiert die Mean Reversion Strategie
+     */
     constructor() {
+        /**
+         * Historische Returns der Strategie
+         * @type {number[]}
+         */
         this.returns = [];
     }
 
+    /**
+     * Aktualisiert die Strategie mit neuem Preisverlauf
+     * @param {Array<{t: number, p: number, step: number}>} h - Preisverlauf
+     * @returns {?number} Aktueller Return oder null bei unzureichenden Daten
+     */
     update(h) { // h is history array
         const len = h.length;
         if (len < 20) return null;
@@ -221,17 +345,37 @@ class MeanReverter {
         return this.returns[this.returns.length - 1];
     }
 
+    /**
+     * Gibt das aktuelle Handelssignal zurück
+     * @returns {number} -1 (Verkaufen), 0 (Halten) oder 1 (Kaufen)
+     */
     signal() {
         const last = this.returns[this.returns.length - 1];
         return last > 0.01 ? 1 : last < -0.01 ? -1 : 0;
     }
 }
 
+/**
+ * Trend Following Strategie - Folgt dem aktuellen Trend
+ * Verwendet Exponential Moving Average für die Trenderkennung
+ */
 class TrendFollower {
+    /**
+     * Initialisiert die Trend Following Strategie
+     */
     constructor() {
+        /**
+         * Historische Returns der Strategie
+         * @type {number[]}
+         */
         this.returns = [];
     }
 
+    /**
+     * Aktualisiert die Strategie mit neuem Preisverlauf
+     * @param {Array<{t: number, p: number, step: number}>} h - Preisverlauf
+     * @returns {?number} Aktueller Return oder null bei unzureichenden Daten
+     */
     update(h) {
         if (h.length < 10) return null;
         const ema = (a, b, lam = 0.2) => lam * b + (1 - lam) * a;
@@ -243,18 +387,42 @@ class TrendFollower {
         return mom;
     }
 
+    /**
+     * Gibt das aktuelle Handelssignal zurück
+     * @returns {number} -1 (Verkaufen), 0 (Halten) oder 1 (Kaufen)
+     */
     signal() {
         const m = this.returns[this.returns.length - 1];
         return m > 0.005 ? 1 : m < -0.005 ? -1 : 0;
     }
 }
 
+/**
+ * Cycle Detection Strategie - Erkennt zyklische Preisbewegungen
+ * Verwendet Relative Strength Index (RSI) als Indikator
+ */
 class CycleDetector {
+    /**
+     * Initialisiert die Cycle Detection Strategie
+     */
     constructor() {
+        /**
+         * Historische Returns der Strategie
+         * @type {number[]}
+         */
         this.returns = [];
+        /**
+         * Letzter Zustand
+         * @type {number}
+         */
         this.last = 0;
     }
 
+    /**
+     * Aktualisiert die Strategie mit neuem Preisverlauf
+     * @param {Array<{t: number, p: number, step: number}>} h - Preisverlauf
+     * @returns {number} Aktueller Return
+     */
     update(h) {
         if (h.length < 20) return 0;
         /* simple 10-period RSI instead of FFT – no pow2 needed */
@@ -275,17 +443,37 @@ class CycleDetector {
         return signal * 0.01;
     }
 
+    /**
+     * Gibt das aktuelle Handelssignal zurück
+     * @returns {number} -1 (Verkaufen), 0 (Halten) oder 1 (Kaufen)
+     */
     signal() {
         return this.returns[this.returns.length - 1] > 0.005 ? -1 :
             this.returns[this.returns.length - 1] < -0.005 ? 1 : 0;
     }
 }
 
+/**
+ * Noise Breaker Strategie - Reagiert auf Preisänderungen
+ * Nutzt kurzfristige Preisbewegungen für Handelssignale
+ */
 class NoiseBreaker {
+    /**
+     * Initialisiert die Noise Breaker Strategie
+     */
     constructor() {
+        /**
+         * Historische Returns der Strategie
+         * @type {number[]}
+         */
         this.returns = [];
     }
 
+    /**
+     * Aktualisiert die Strategie mit neuem Preisverlauf
+     * @param {Array<{t: number, p: number, step: number}>} h - Preisverlauf
+     * @returns {?number} Aktueller Return oder null bei unzureichenden Daten
+     */
     update(h) {
         if (h.length < 10) return null;
         const diff = h[h.length - 1].p - h[h.length - 2].p;
@@ -294,34 +482,77 @@ class NoiseBreaker {
         return diff;
     }
 
+    /**
+     * Gibt das aktuelle Handelssignal zurück
+     * @returns {number} -1 (Verkaufen), 0 (Halten) oder 1 (Kaufen)
+     */
     signal() {
         const d = this.returns[this.returns.length - 1];
         return d > 0.01 ? -1 : d < -0.01 ? 1 : 0;
     }
 }
 
+/**
+ * Order Impact Probe Strategie - Simuliert Order-Impact Messung
+ * Aktuell als Dummy-Implementierung
+ */
 class OrderImpactProbe {
+    /**
+     * Initialisiert die Order Impact Probe Strategie
+     */
     constructor() {
+        /**
+         * Historische Returns der Strategie
+         * @type {number[]}
+         */
         this.returns = [];
+        /**
+         * Größe der Test-Orders
+         * @type {number}
+         */
         this.probeSize = 1;
     }
 
+    /**
+     * Aktualisiert die Strategie (Dummy-Implementierung)
+     * @param {Array<{t: number, p: number, step: number}>} h - Preisverlauf
+     * @returns {number} 0 (kein Signal)
+     */
     update(h) {
         // dummy – real implementation would compare price before/after our trade
         this.returns.push(0);
         return 0;
     }
 
+    /**
+     * Gibt das aktuelle Handelssignal zurück (immer 0)
+     * @returns {number} 0 (kein Signal)
+     */
     signal() {
         return 0;
     }
 }
 
+/**
+ * Globales Trading-Strategie-Objekt
+ * @global
+ * @type {TradingStrategy}
+ */
 window.tradingStrategy = new TradingStrategy();
+/**
+ * Schaltet den Bot ein oder aus
+ * @global
+ * @function setBot
+ * @param {boolean} on - True zum Einschalten, False zum Ausschalten
+ */
 window.setBot = (on) => {
     window.tradingStrategy.botOn = Boolean(on);
     // console.log(`[BOT] ${window.tradingStrategy.botOn ? 'ARMED' : 'DISARMED'}`);
 };
+/**
+ * Löscht den Skip-Cache beim Start
+ * @global
+ */
 window.tradingStrategy.skipCache.clear();
 /* start in safe mode */
 window.setBot(false);
