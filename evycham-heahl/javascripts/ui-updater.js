@@ -318,7 +318,7 @@ async function populateRecipientSelector() {
     const container = getElementSafe('recipient-selector-container', 'populateRecipientSelector');
     const username = getElementSafe('username', 'recipient-selector');
     if (!container) return;
-    if(!username) return;
+    if (!username) return;
 
     // Container leeren
     while (container.firstChild) {
@@ -329,7 +329,7 @@ async function populateRecipientSelector() {
         const result = await getEverybody();
 
         if (result.success) {
-            const users = result.data;
+            const users = result.data.filter(user => user.name !== username.textContent);
 
             users.forEach(user => {
                 const button = document.createElement('button');

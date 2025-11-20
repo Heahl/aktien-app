@@ -281,7 +281,7 @@ async function postMessages(recipient, message) {
                 failedCount++;
                 errors.push({
                     recipient: singleRecipient,
-                    error: singleResult?.error || {status: 0, message: 'Unbekannter Fehler'}
+                    error: singleResult?.errors || {status: 0, message: 'Unbekannter Fehler'}
                 });
             }
         }
